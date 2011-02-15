@@ -1,0 +1,31 @@
+Files in schedule/ must be in CSV format (and must have either 'csv' or 'txt'
+extension; the latter is useful for editing in Notepad).  There must be no
+heading row.  The 7 columns must be:
+
+1. Day of the week.  One of the following: mon tue wed thu fri sat sun
+2. Start time. Format: hhmm
+3. End time. Format: hhmm
+4. Start padding (override).  This value overrides the global start padding
+   configured in the INI file; leave blank to accept the default.  The start
+   padding adds time to the start of the show; it's a whole number of seconds.
+5. End padding (override).  This value overrides the global end padding
+   configured in the INI file; leave blank to accept the default.  The end
+   padding adds time to the end of the show; it's a whole number of seconds.
+6. Show code name.
+7. Optional list of presenter code names, separated by semicolons.
+
+
+A file in schedule/ is named after the date on which that schedule comes into
+effect.  If there are multiple files, the latest date which is equal to or
+earlier than the date under consideration is the one that's used.  The name
+format must be YYYY-MM-DD.ext .
+
+A file in schedule/override/ is also named YYYY-MM-DD.ext .  Such a file
+applies to that date ONLY, not to all dates which come after it.  If such a
+file is present for the date under consideration, files in schedule/ are
+ignored.  For convenience, files in schedule/override/ need not include a day
+of the week value (but the column must be present; just put a comma before the
+start time).  If a day of the week is present, it must be correct for the date
+or the row will be ignored.
+
+Lines starting with ; or # are treated as comments and ignored.
