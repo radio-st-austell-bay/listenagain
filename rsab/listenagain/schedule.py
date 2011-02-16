@@ -171,3 +171,38 @@ def get_schedule_item_as_string(schedule_item):
         ','.join(presenters),
     ]
     return ' '.join(components)
+
+
+def schedule_from_audio_file_name(fname):
+    import datetime
+    import os.path
+    import re
+    pattern = re.compile('''
+        (?P<y>[0-9]{4})(?P<m>[0-9]{2})(?P<d>[0-9]{2})
+        _
+        (?P<sh>[0-9]{2})(?P<sm>[0-9]{2})(?P<ss>[0-9]{2})
+        _
+        (?P<eh>[0-9]{2})(?P<em>[0-9]{2})(?P<es>[0-9]{2})
+        _
+        (?P<show>[0-9a-zA-Z-]+)
+        (?P<presenters>(?:,(?:[0-9a-zA-Z-]+))*)
+        (?:_(?P<extra>.+))?\\.(?P<ext>[^.]+)
+        ''',
+        re.VERBOSE
+    )
+
+    match = pattern.match(os.path.split(fname)[1])
+    if match is None:
+        return None
+
+    groups = match.groups()
+    schedule_dict = {
+        'date': datetime.date(int(groups[0]), int(groups[1]), int(groups[2])),
+        'start': datetime.time(int(groups[3]), int(groups[4]), int(groups[5])),
+        'end': datetime.time(int(groups[6]), int(groups[7]), int(groups[8])),
+        'show': groups[9].strip(),
+        'presenters': filter(None, [p.strip() for p in groups[10].split(',')]),
+        'extra': groups[11],
+    }
+    return schedule_dict
+

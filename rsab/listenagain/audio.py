@@ -116,11 +116,14 @@ def make_output_file_name(date, schedule_item, ext, extra=None):
 
 # XXX Print some things here to say we're doing things...
 def encode_file(path, details=None):
-    from rsab.listenagain import config, utils, ListenAgainConfigError
+    from rsab.listenagain import config, ListenAgainConfigError
+    import schedule
+    import utils
+
     import os
 
     if details is None:
-        details = utils.parse_audio_file_name(path)
+        details = schedule.schedule_from_audio_file_name(path)
     if details is None:
         print 'No details available from path name; skipping:', os.path.split(path)[1]
         return None
