@@ -27,6 +27,7 @@
 
 def run():
     from optparse import OptionParser
+    import datetime
     import glob
     import os
     import time
@@ -34,6 +35,7 @@ def run():
     import audio
     import utils
     import recorder
+    import remote
     import schedule
 
     option_parser = OptionParser()
@@ -100,8 +102,8 @@ def run():
     elif not options.wavs and not options.encode and not options.index and not options.upload:
         options.wavs = True
         options.encode = True
-        options.index = False#True
-        options.upload = False#True
+        options.index = False#True # XXX Change back when code is ready
+        options.upload = True
 
     config_files = utils.default_config_files()
     if options.config_file is not None:
@@ -143,26 +145,63 @@ def run():
             audio.encode_file(path)
             for path in wav_files
         ]
-        for (wav, mp3) in zip(wav_files, mp3_files):
-            if mp3 is not None:
-                pass # Delete WAV if no-delete option isn't present
+        if True: # XXX look for no-delete option later
+            print 'Deleting local copies of WAVs...'
+            for (wav, mp3) in zip(wav_files, mp3_files):
+                if mp3 is not None:
+                    os.unlink(wav)
+                    print '   ', wav
+            print 'done.'
+            print
 
-    if options.upload:
-        if mp3_files is None:
-            raise NotImplementedError('get list of MP3 files')
-        raise NotImplementedError('upload MP3s and delete old ones')
-
+    ftp_conn = None
+    remote_audio_files = []
     if options.upload or options.index:
-        raise NotImplementedError('connect to server to get list of files')
+        ftp_conn = remote.connect()
+        remote_audio_files = ftp_conn.get_list_of_audio_files()
         if not options.upload:
             # XXX Modify list based on current recordings, or make index for
             # what's been uploaded already?
-            raise NotImplementedError
+            pass#raise NotImplementedError
+
+    if options.upload:
+        if mp3_files is None:
+            if config.has_option('main', 'mp3s'):
+                mp3s_dir = config.get('main', 'mp3s')
+            else:
+                mp3s_dir = os.getcwd()
+            mp3_files = glob.glob(os.path.join(mp3s_dir, '*.mp3'))
+        uploaded = ftp_conn.upload_audio(mp3_files)
+
+        if True: # XXX look for no-delete option later
+            print 'Deleting local copies of MP3s...'
+            for mp3_path in mp3_files:
+                if os.path.split(mp3_path)[1] in uploaded:
+                    print '   ', mp3_path
+                    os.unlink(mp3_path)
+            print 'done.'
+            print
+
+        if config.has_option('ftp', 'keep_days'):
+            keep_days = config.getint('ftp', 'keep_days')
+        else:
+            keep_days = 7
+        ftp_conn.remove_old_audio(date - datetime.timedelta(days=keep_days))
+
+#    if options.upload or options.index:
+#        raise NotImplementedError('connect to server to get list of files')
+#        if not options.upload:
+#            # XXX Modify list based on current recordings, or make index for
+#            # what's been uploaded already?
+#            raise NotImplementedError
 
     if options.index:
         raise NotImplementedError('Build index files')
         if options.upload:
             raise NotImplementedError('Upload index files')
+
+    if ftp_conn is not None:
+        ftp_conn.quit()
 
     end_time = time.time()
     if not options.print_only:
