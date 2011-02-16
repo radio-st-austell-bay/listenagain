@@ -148,7 +148,7 @@ def run():
         if True: # XXX look for no-delete option later
             print 'Deleting local copies of WAVs...'
             for (wav, mp3) in zip(wav_files, mp3_files):
-                if mp3 is not None:
+                if mp3 is not None and os.path.isfile(wav):
                     os.unlink(wav)
                     print '   ', wav
             print 'done.'
@@ -185,7 +185,8 @@ def run():
         if True: # XXX look for no-delete option later
             print 'Deleting local copies of MP3s...'
             for mp3_path in mp3_files:
-                if os.path.split(mp3_path)[1] in uploaded:
+                if os.path.split(mp3_path)[1] in uploaded \
+                and os.path.isfile(mp3_path):
                     print '   ', mp3_path
                     os.unlink(mp3_path)
             print 'done.'
