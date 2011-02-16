@@ -165,6 +165,15 @@ def run():
             pass#raise NotImplementedError
 
     if options.upload:
+
+        # XXX Maybe have option to do this before or after: after is safer, but
+        # before is preferable if we're tight on disk space.
+        if config.has_option('ftp', 'keep_days'):
+            keep_days = config.getint('ftp', 'keep_days')
+        else:
+            keep_days = 7
+        ftp_conn.remove_old_audio(date - datetime.timedelta(days=keep_days))
+
         if mp3_files is None:
             if config.has_option('main', 'mp3s'):
                 mp3s_dir = config.get('main', 'mp3s')
@@ -181,12 +190,6 @@ def run():
                     os.unlink(mp3_path)
             print 'done.'
             print
-
-        if config.has_option('ftp', 'keep_days'):
-            keep_days = config.getint('ftp', 'keep_days')
-        else:
-            keep_days = 7
-        ftp_conn.remove_old_audio(date - datetime.timedelta(days=keep_days))
 
 #    if options.upload or options.index:
 #        raise NotImplementedError('connect to server to get list of files')
