@@ -1,0 +1,67 @@
+#--------------------------------------------------------------------
+# Monday
+mon,0700,1000,,,breakfast,jimkane;biffgriffin;johnb
+mon,1000,1300,,,cornishconnexion,paulinegiles
+mon,1300,1600,,,bernieshepherd,
+mon,1600,1700,,,moiraking,
+mon,1700,2000,,,drivetime,robmoore
+mon,2000,2100,,,worldmusic,markfrazer
+# Brass In The Bay is prerecorded.  We aim to get this using a different
+# system in future (accessing the original recording).
+mon,2100,2200,,,brassinthebay,kevinackford
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Tuesday
+tue,0700,1000,,,breakfast,jimkane;sallycarter
+tue,1000,1300,,,domwherry,
+tue,1300,1600,,,johnb,
+tue,1600,1700,,,carclaze,simonpollard;janetpollard
+tue,1700,1900,,,janetandali,janetpollard;ali
+tue,1900,2030,,,readysteadymod,martinbate
+tue,2030,2200,,,dougbence,
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Wednesday
+wed,0700,1000,,,breakfast,jimkane;nathanhunkin
+wed,1000,1300,,,jennytrennelly,
+wed,1300,1600,,,curtainup,sheilavanloo;gwenmcgirl
+wed,1600,1800,,,poltair,
+wed,1800,1900,,,garyking,
+wed,1900,2200,,,endoftheworldshow,john;brad;dave
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Thursday
+thu,0700,1000,,,breakfast,jimkane;jennytrennelly
+thu,1000,1300,,,baywatch,pamgriffin
+thu,1300,1600,,,biffgriffin,
+thu,1600,1700,,,heligangrapevine,
+thu,1700,1800,,,staustellcollege,
+thu,1800,2000,,,eden,
+thu,2000,2200,,,radar,richardwhitehouse;stevetregidgo
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Friday
+fri,0700,1000,,,breakfast,jimkane
+fri,1000,1100,,,poetry,marjjames
+fri,1100,1200,,,sallycarter,
+fri,1200,1300,,,garyking,
+fri,1300,1600,,,newsviews,garyking;fionacarlyon
+fri,1600,1900,,,weekendwarmup,nathanhunkin
+fri,1900,2200,,,soundlounge,sheilavanloo;lu
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Saturday
+sat,1000,1300,,,peteg,
+sat,1300,1500,,,garyking,
+sat,1500,1900,,,sport,dalegodding
+sat,1900,2200,,,saturdaysessions,natalieturl
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# (No new shows on Sunday)
+#--------------------------------------------------------------------
