@@ -1,19 +1,16 @@
 
 # Next:
 # - Wrap all this in try/except and try/finally with logging
-# - Add auto subversion version number to pass to optionparser
+# - Add auto subversion version number to pass to optionparser:
+#   http://stackoverflow.com/questions/4351032/automatic-version-numbering
 # - add tee class
 # - add function to make log file (named after date, with (2) if nec.)
 # - be more verbose
-# - implement schedule printer (always print it, and sometimes do no more)
 # - email log
-# - Utility to parse WAV/MP3 name to get start/end/show/presenters.
 # - encode new WAV files
 # - option to time construction of a WAV file of N seconds (for tuning frame
 #   chunk size config value).
 # - options to do some things but not others:
-#   -w: make WAV files
-#   -m: make MP3 files (using WAVs from -w run)
 #   -i: make index pages (using all MP3s found)
 #   -u: upload MP3s and index files, and delete old MP3s from server
 # - option to not delete working files
@@ -24,8 +21,8 @@
 #   attributes (not dynamic as we must distinguish between cases where we've
 #   read the schedule file and parsed file names), show and presenter names and
 #   methods for translating them.
-# - fname parser to use regexes and be in schedule module.
 # - write a class to write a progress bar to stdout for when making WAVs.
+# - make RSS feeds when we make the index.
 
 
 def run():
