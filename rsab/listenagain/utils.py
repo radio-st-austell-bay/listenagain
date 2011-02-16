@@ -26,7 +26,12 @@ def init_config(config_files=None):
         rsab.listenagain.config = SafeConfigParser()
         rsab.listenagain.config.read(config_files)
 
-    return rsab.listenagain.config
+    config = rsab.listenagain.config
+    if config.has_option('main', 'disabled') \
+    and config.get('main', 'disabled').lower() in ['y', 'yes', 'true', 't', '1']:
+        raise rsab.listenagain.ListenAgainConfigError('Disabled with [main]/disabled. Missing a custom config?')
+
+    return config
 
 
 def parse_date(date_string):
