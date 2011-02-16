@@ -89,11 +89,10 @@ def make_wav_files(date, bounds_and_files, schedule_list):
         wav_writer.close()
         if wrote_frames:
             print 'Wrote', utils.format_large_number(wrote_frames), 'frames'
+            output_wav_files.append(output_file_name)
         else:
             print 'Wrote no frames; deleting empty file'
             os.unlink(output_file_name)
-
-        output_wav_files.append(output_file_name)
 
     return output_wav_files
 
