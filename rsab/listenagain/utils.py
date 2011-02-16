@@ -17,8 +17,10 @@ def default_config_files():
     return config_list
 
 
-def init_config(config_files):
+def init_config(config_files=None):
     import rsab.listenagain
+    if config_files is None:
+        config_files = default_config_files()
     if rsab.listenagain.config is None:
         from ConfigParser import SafeConfigParser
         rsab.listenagain.config = SafeConfigParser()
