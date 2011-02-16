@@ -164,9 +164,20 @@ def encode_file(path, details=None):
         artist = config.get('encoder', 'artist')
     else:
         artist = 'Radio St Austell Bay'
-    # XXX Need to map internal show code to a real name
+
     show_date = details['date'].strftime('%d %B %Y')
-    show_name = '%s, %s' % (details['show'], show_date)
+    show_name = utils.get_message(details['show'], 'show', default=None)
+    if show_name is None:
+        show_name = utils.get_message(details['show'], 'presenter', default=details['show'])
+    presenters = filter(None, [
+        utils.get_message(presenter, 'presenter', default=presenter)
+        for presenter in details.get('presenters', [])
+        if presenter != details['show']
+    ])
+    if presenters:
+        presenters[:-1] = [ ', '.join(presenters[:-1]) ]
+        show_name = '%s (%s)' % (show_name, ' and '.join(presenters))
+    show_name = '%s, %s' % (show_name, show_date)
 
     input_file_name = path
     output_file_name = os.path.splitext(os.path.split(path)[1])[0] + '.mp3'

@@ -90,5 +90,32 @@ def format_large_number(n):
     return s
 
 
-
+_absent_parameter = object()
+def get_message(message_name, message_type, default=_absent_parameter):
+    from rsab.listenagain import config
+    if not config.has_option('messages', message_type):
+        if default is _absent_parameter:
+            raise ValueError('Message file not found', message_type)
+        return default
+    f = open(config.get('messages', message_type), 'r')
+    found_message = None
+    for line in f:
+        line = line.strip()
+        if not line or line.startswith('#') or line.startswith(';'):
+            continue
+        if '=' in line:
+            key, value = line.split('=', 1)
+        else:
+            continue
+        key = key.strip()
+        value = value.strip()
+        if key == message_name:
+            found_message = value
+            break
+    f.close()
+    if found_message is None:
+        if default is _absent_parameter:
+            raise ValueError('Message not found', message_type, message_name)
+        return default
+    return found_message
 
