@@ -181,12 +181,13 @@ def encode_file(path, details=None):
 
     input_file_name = path
     output_file_name = os.path.splitext(os.path.split(path)[1])[0] + '.mp3'
+    output_file_path = os.path.join(output_dir, output_file_name)
     option_vars = {
         'artist': escape(artist),
         'title': escape(show_name),
         'year': escape(str(details['date'].year)),
         'input': escape(input_file_name),
-        'output': escape(os.path.join(output_dir, output_file_name)),
+        'output': escape(output_file_path),
     }
     if config.has_option('encoder', 'image'):
         option_vars['image'] = config.get('encoder', 'image')
@@ -200,6 +201,7 @@ def encode_file(path, details=None):
         option_vars['input'] = option_vars['output']
 
     print 'file done.'
+    print
 
-    return output_file_name
+    return output_file_path
 
