@@ -11,8 +11,6 @@ class ListenAgainFTP(_FTP):
         SECTION_NAME = 'ftp'
         for config_key, key in [
             ('audio_path', 'audio_path'),
-            ('date_index', 'index_by_date'),
-            ('presenter_index', 'index_by_presenter'),
         ]:
             if not config.has_option(SECTION_NAME, config_key):
                 raise ListenAgainConfigError('Missing option', SECTION_NAME, config_key)
