@@ -23,6 +23,24 @@
 #   methods for translating them.
 # - write a class to write a progress bar to stdout for when making WAVs.
 # - make RSS feeds when we make the index.
+# - error-handling for FTP: what if we can't get access to the server?  What if
+#   we have it but lose it?  (We need to make an index file which covers the
+#   files we won't delete but none of the new ones, upload that, then delete
+#   the old ones and upload the new ones before finally uploading the new
+#   index.)
+# - more FTP: check for existing file before uploading.  If it's the same size,
+#   don't upload.  If it's smaller, resume if possible rather than uploading.
+#   If we lose the connection, sleep and retry up to some limit -- last night
+#   it seems there was a blip in the connection.
+# - Speed up WAV generation: seek from current pos (should be end of header) in
+#   WAV when skipping.  Skip frames times frame width bytes.  Test each method
+#   and compare output: if identical, we can make this part faster!
+# - Web server: need it to support ranges.
+# - jPlayer: need a wider seek bar?
+# - Can we supply a time to jPlayer so it doesn't have to download file right
+#   now in order to display duration?
+# - look for info in URL (eg after #) telling us which file to play.
+
 
 
 def run():
