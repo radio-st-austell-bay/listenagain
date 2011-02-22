@@ -164,7 +164,7 @@ def encode_file(path, details=None):
     else:
         artist = 'Radio St Austell Bay'
 
-    show_date = details['date'].strftime('%d %B %Y')
+    show_date = details['date'].strftime('%A %d %B %Y')
     show_name = utils.get_message(details['show'], 'show', default=None)
     if show_name is None:
         show_name = utils.get_message(details['show'], 'presenter', default=details['show'])
