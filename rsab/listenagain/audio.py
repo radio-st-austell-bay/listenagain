@@ -164,20 +164,10 @@ def encode_file(path, details=None):
     else:
         artist = 'Radio St Austell Bay'
 
-    show_date = details['date'].strftime('%A %d %B %Y')
-    show_name = utils.get_message(details['show'], 'show', default=None)
-    if show_name is None:
-        show_name = utils.get_message(details['show'], 'presenter', default=details['show'])
-    presenters = filter(None, [
-        utils.get_message(presenter, 'presenter', default=presenter)
-        for presenter in details.get('presenters', [])
-        if presenter != details['show']
-    ])
-    if presenters:
-        if len(presenters) > 1:
-            presenters[:-1] = [ ', '.join(presenters[:-1]) ]
-        show_name = '%s (%s)' % (show_name, ' and '.join(presenters))
-    show_name = '%s, %s' % (show_name, show_date)
+    show_name = '%s, %s' % (
+        utils.get_show_title_string(details['show'], details.get('presenters', [])),
+        details['date'].strftime('%A %d %B %Y'),
+    )
 
     input_file_name = path
     output_file_name = os.path.splitext(os.path.split(path)[1])[0] + '.mp3'

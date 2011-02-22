@@ -124,3 +124,20 @@ def get_message(message_name, message_type, default=_absent_parameter):
         return default
     return found_message
 
+
+def get_show_title_string(show, presenters=None):
+    if presenters is None:
+        presenters = []
+    show_title = get_message(show, 'show', default=None)
+    if show_title is None:
+        show_title = get_message(show, 'presenter', default=show)
+    presenters = filter(None, [
+        get_message(presenter, 'presenter', default=presenter)
+        for presenter in presenters
+        if presenter != show
+    ])
+    if presenters:
+        if len(presenters) > 1:
+            presenters[:-1] = [ ', '.join(presenters[:-1]) ]
+        show_title = '%s (%s)' % (show_title, ' and '.join(presenters))
+    return show_title
