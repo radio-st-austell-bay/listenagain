@@ -51,6 +51,7 @@ def run():
     import time
 
     import audio
+    import html
     import utils
     import recorder
     import remote
@@ -120,7 +121,7 @@ def run():
     elif not options.wavs and not options.encode and not options.index and not options.upload:
         options.wavs = True
         options.encode = True
-        options.index = False#True # XXX Change back when code is ready
+        options.index = True
         options.upload = True
 
     config_files = utils.default_config_files()
@@ -175,22 +176,30 @@ def run():
     ftp_conn = None
     remote_audio_files = []
     if options.upload or options.index:
-        ftp_conn = remote.connect()
-        remote_audio_files = ftp_conn.get_list_of_audio_files()
-        if not options.upload:
-            # XXX Modify list based on current recordings, or make index for
-            # what's been uploaded already?
-            pass#raise NotImplementedError
-
-    if options.upload:
-
-        # XXX Maybe have option to do this before or after: after is safer, but
-        # before is preferable if we're tight on disk space.
         if config.has_option('ftp', 'keep_days'):
             keep_days = config.getint('ftp', 'keep_days')
         else:
             keep_days = 7
-        ftp_conn.remove_old_audio(date - datetime.timedelta(days=keep_days))
+        earliest_keep_date = date - datetime.timedelta(days=keep_days)
+        ftp_conn = remote.connect()
+        remote_audio_files = ftp_conn.get_list_of_audio_files()
+
+        # First make an index with no old files:
+        audio_files_for_first_index = [
+            fname
+            for (fname, details) in [
+                (fname, schedule.schedule_from_audio_file_name(fname))
+                for fname in remote_audio_files
+            ]
+            if details is not None and details['date'] > earliest_keep_date
+        ]
+
+        index_fname = html.make_index_file(audio_files_for_first_index)
+        if options.upload:
+            ftp_conn.storlines('STOR index.html', open(index_fname, 'r'))
+
+    if options.upload:
+        ftp_conn.remove_old_audio(earliest_keep_date)
 
         if mp3_files is None:
             if config.has_option('main', 'mp3s'):
@@ -210,17 +219,12 @@ def run():
             print 'done.'
             print
 
-#    if options.upload or options.index:
-#        raise NotImplementedError('connect to server to get list of files')
-#        if not options.upload:
-#            # XXX Modify list based on current recordings, or make index for
-#            # what's been uploaded already?
-#            raise NotImplementedError
-
     if options.index:
-        raise NotImplementedError('Build index files')
+        # Second index file: whatever's on the server.
+        remote_audio_files = ftp_conn.get_list_of_audio_files()
+        index_fname = html.make_index_file(remote_audio_files)
         if options.upload:
-            raise NotImplementedError('Upload index files')
+            ftp_conn.storlines('STOR index.html', open(index_fname, 'r'))
 
     if ftp_conn is not None:
         ftp_conn.quit()
