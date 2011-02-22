@@ -174,7 +174,8 @@ def encode_file(path, details=None):
         if presenter != details['show']
     ])
     if presenters:
-        presenters[:-1] = [ ', '.join(presenters[:-1]) ]
+        if len(presenters) > 1:
+            presenters[:-1] = [ ', '.join(presenters[:-1]) ]
         show_name = '%s (%s)' % (show_name, ' and '.join(presenters))
     show_name = '%s, %s' % (show_name, show_date)
 
