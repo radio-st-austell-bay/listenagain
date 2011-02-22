@@ -74,7 +74,8 @@ class ListenAgainFTP(_FTP):
             if fname.startswith('.'):
                 continue
             schedule_data = schedule.schedule_from_audio_file_name(fname)
-            if schedule_data['date'] < earliest_keep_date:
+            if schedule_data is not None \
+            and schedule_data['date'] < earliest_keep_date:
                 if not quiet:
                     print 'Deleting remote file:', fname, '...',
                 self.delete(fname)
