@@ -81,6 +81,7 @@ class ListenAgainFTP(_FTP):
                 if not quiet:
                     print 'done.'
                 deleted.append(fname)
+        self.cwd(pwd)
         return deleted
 
 
