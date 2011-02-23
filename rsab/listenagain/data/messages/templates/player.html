@@ -2,6 +2,7 @@
   <head>
     <title>RSAB: Listen Again</title>
     <link type="text/css" href="/skin/jplayer.blue.monday.css" rel="stylesheet" />
+    <link type="text/css" href="/css/listenagain.css" rel="stylesheet" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
     <script type="text/javascript" src="/js/jquery.jplayer.min.js"></script>
 
@@ -9,6 +10,9 @@
       $(document).ready(function(){
         $("#jquery_jplayer_rsab").jPlayer({
           ready: rsab_process_query_parameters,
+          ended: function () {
+              $('#rsab-playlist tr.rsab-playlist-item-playing').removeClass('rsab-playlist-item-playing')
+          },
           cssSelectorAncestor: "#jp_interface_rsab",
           swfPath: "/js",
           supplied: "mp3"
@@ -23,6 +27,8 @@
             media[ext] = filepath
             $("#jquery_jplayer_rsab").jPlayer("setMedia", media).jPlayer("play")
             $("#jp_playlist_rsab").text($('.rsab-playlist-item-title', this).text())
+            row.closest('table').find('.rsab-playlist-item-playing').removeClass('rsab-playlist-item-playing')
+            row.addClass('rsab-playlist-item-playing')
         })
 
         function rsab_process_query_parameters() {
