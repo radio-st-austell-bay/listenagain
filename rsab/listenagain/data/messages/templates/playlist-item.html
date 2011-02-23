@@ -1,4 +1,12 @@
-    <li>
-      <input type="hidden" name="src" value="%(url)s" />
-      %(date)s: <span class="rsab-item-title">%(title)s</span>
-    </li>
+    <tr class="rsab-playlist-item">
+      <td class="rsab-playlist-item-when">
+        <input type="hidden" name="src" value="%(url)s" />
+        <span class="rsab-playlist-item-date">%(date)s</span> <span class="rsab-playlist-item-time">%(start_time)s</span>
+      </td>
+      <td class="rsab-playlist-item-show">
+        <span class="rsab-playlist-item-title">%(title)s</span>
+      </td>
+      <td class="rsab-playlist-item-duration">
+        %(duration)s
+      </td>
+    </tr>

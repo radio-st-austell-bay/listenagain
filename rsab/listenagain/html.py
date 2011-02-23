@@ -50,6 +50,7 @@ class Template:
 
 
 def make_playlist_item(audio_fname):
+    import datetime
     import os
     import urllib
 
@@ -70,6 +71,24 @@ def make_playlist_item(audio_fname):
         details.get('presenters'),
     )
     template.date = details['date'].strftime('%A %d %B %Y')
+    template.start_time = details['start'].strftime('%H:%M')
+    template.end_time = details['end'].strftime('%H:%M')
+
+    duration = (
+        datetime.datetime.combine(details['date'], details['end'])
+        - datetime.datetime.combine(details['date'], details['start'])
+    ).seconds / 60.0 # approx minutes
+    if duration % 15 < 7.5:
+        duration = divmod(duration, 15)[0] * 15
+    else:
+        duration = (divmod(duration, 15)[0] + 1) * 15
+    duration_h, duration_m = divmod(duration, 60)
+    if duration_m:
+        duration_string = '%dh %dm' % (duration_h, duration_m)
+    else:
+        duration_string = '%dh' % (duration_h,)
+    template.duration = duration_string
+
     template.url = audio_path + urllib.quote(os.path.split(audio_fname)[1])
     return template
 

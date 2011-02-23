@@ -14,13 +14,14 @@
         });
         $.jPlayer.timeFormat.showHour = true
 
-        $("#rsab-playlist li").click(function () {
-            var filepath = $(this).find('input[name="src"]').val()
+        $("#rsab-playlist tr.rsab-playlist-item").click(function () {
+            var row = $(this).closest('tr.rsab-playlist-item')
+            var filepath = row.find('input[name="src"]').val()
             var ext = filepath.split('.').pop()
             var media = {}
             media[ext] = filepath
             $("#jquery_jplayer_rsab").jPlayer("setMedia", media).jPlayer("play")
-            $("#jp_playlist_rsab").text($('.rsab-item-title', this).text())
+            $("#jp_playlist_rsab").text($('.rsab-playlist-item-title', this).text())
         })
 
       });
@@ -57,9 +58,14 @@
       </div>
     </div>
 
-  <ul id="rsab-playlist">
-    %(playlist_items)s
-  </ul>
+  <table id="rsab-playlist">
+    <tr class="rsab-playlist-heading">
+      <th>Date/Time</th>
+      <th>Show</th>
+      <th>Duration</th>
+    </tr>
+%(playlist_items)s
+  </table>
 
   </body>
 </html>
