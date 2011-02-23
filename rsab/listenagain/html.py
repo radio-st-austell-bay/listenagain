@@ -93,12 +93,23 @@ def make_playlist_item(audio_fname):
         duration_string = '%dh' % (duration_h,)
     template.duration = duration_string
 
+    hidden_input = '<input type="hidden" disabled="disabled" name="%s" value="%s" />'
+    template.show_names = hidden_input % ('show', details['show'])
+    template.presenter_names = '\n'.join([
+        hidden_input % ('presenter', presenter)
+        for presenter in details.get('presenters', [])
+        if presenter and presenter != details['show']
+    ])
+
     template.url = audio_path + urllib.quote(os.path.split(audio_fname)[1])
     return template
 
 
 def make_index_file(audio_fname_list, output_fname=None):
     import os
+
+    import schedule
+    import utils
     from rsab.listenagain import config, ListenAgainConfigError
     if not config.has_option('DEFAULT', 'output'):
         raise ListenAgainConfigError('No [DEFAULT]/output config defined')
@@ -109,11 +120,35 @@ def make_index_file(audio_fname_list, output_fname=None):
     output_file = open(output_fname, 'w')
 
     template = Template('player')
-    template.playlist_items = '\n'.join([
-        str(make_playlist_item(audio_fname))
-        for audio_fname in audio_fname_list
-    ])
 
+    playlist_items = []
+    show_name_mapping = {}
+    presenter_name_mapping = {}
+    for audio_fname in audio_fname_list:
+        playlist_items.append(str(make_playlist_item(audio_fname)))
+        details = schedule.schedule_from_audio_file_name(audio_fname)
+        show_name = details['show']
+        show_title = utils.get_message(show_name, 'show', default=None)
+        if show_title is None:
+            show_title = utils.get_message(show_name, 'presenter', default=show_name)
+        if show_name not in show_name_mapping:
+            show_name_mapping[show_name] = show_title
+        for presenter in details.get('presenters', []):
+            if not presenter or presenter == show_name:
+                continue
+            if presenter not in presenter_name_mapping:
+                presenter_name_mapping[presenter] = utils.get_message(presenter, 'presenter', default=presenter)
+
+    template.playlist_items = '\n'.join(playlist_items)
+    hidden_input = '<input type="hidden" disabled="disabled" name="%s" value="%s" />'
+    template.show_name_mapping = '\n'.join([
+        hidden_input % ('showname', '%s:%s' % pair)
+        for pair in show_name_mapping.items()
+    ])
+    template.presenter_name_mapping = '\n'.join([
+        hidden_input % ('presentername', '%s:%s' % pair)
+        for pair in presenter_name_mapping.items()
+    ])
     output_file.write(str(template))
     output_file.close()
     return output_fname

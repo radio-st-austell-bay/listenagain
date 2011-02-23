@@ -71,6 +71,18 @@
             return -1 * $.fn.dataTableExt.oSort['rsab-date-time-desc'](x, y)
         }
 
+        $.fn.dataTableExt.oSort['rsab-title-desc'] = $.fn.dataTableExt.oSort['string-desc']
+        $.fn.dataTableExt.oSort['rsab-title-asc'] = $.fn.dataTableExt.oSort['string-asc']
+
+        $.fn.dataTableExt.ofnSearch['rsab-title']  = function(sData) {
+            cell = $('<div>'+sData+'</div>')
+            names = []
+            cell.find('input[name=show], input[name=presenter]').each(function () {
+                names.push($(this).val())
+            })
+            return ',' + names.join(',') + ','
+        }
+
         rsab_table_ready = false
         rsab_parameters_processed = false
         rsab_do_autoplay = false
@@ -79,7 +91,7 @@
         $('#rsab-playlist').dataTable({
             bPaginate: true,
             bLengthChange: true,
-            bFilter: false, // we'll use a custom filter
+            bFilter: true, // we'll use a custom filter
             bSort: true,
             bInfo: true,
             bAutoWidth: true,
@@ -95,7 +107,7 @@
 
             aoColumns: [
                 { 'sType': 'rsab-date-time' },
-                null,
+                { 'sType': 'rsab-title' },
                 null
             ]
         })
@@ -140,11 +152,13 @@
                         rsab_play_row(matches.first().closest('tr.rsab-playlist-item'))
                     }
                     break
-                  case 'filter':
-                      temp = value.splitmax(':', 1)
-                      filterkey = temp[0]
-                      filtervalue = temp.length == 1 ? '' : temp[1]
-                      // XXX Do something here to apply the filter
+                  case 'namefilter':
+                      rsab_select = $('#rsab-table-filter select[name=name]')
+                      rsab_option = rsab_select.find('option[value="'+value+'"]')
+                      if(rsab_option.length == 0) {
+                          value = '!'
+                      }
+                      rsab_select.val(value).change()
                       break
                   case 'sort':
                       if(value && value[0] == '-') {
@@ -170,6 +184,34 @@
             rsab_parameters_processed = true
             rsab_table_post_init()
           }
+
+          rsab_select_pairs = []
+          rsab_select_pairs_seen = {}
+          $('input[name=showname], input[name=presentername]').each(function () {
+              temp = $(this).val().splitmax(':', 1)
+              key = temp[0]
+              value = temp.length > 1 ? temp[1] : key
+              if(typeof rsab_select_pairs_seen[key] == 'undefined') {
+                  rsab_select_pairs.push([key, value])
+                  rsab_select_pairs_seen[key] = value
+              }
+          })
+          rsab_select_pairs.sort()
+          rsab_select = $('#rsab-table-filter select[name=name]')
+          for(i = 0; i < rsab_select_pairs.length; i++) {
+              $('<option value="' + rsab_select_pairs[i][0] + '"></option>')
+                .text(rsab_select_pairs[i][1])
+                .appendTo(rsab_select)
+          }
+          $('<option value="!">(no match)</option>').appendTo(rsab_select)
+          rsab_select.change(function () {
+              value = $(this).find('option:selected').val()
+              if(value) {
+                  value = ',' + value + ','
+              }
+              $('#rsab-playlist').dataTable().fnFilter(value, 1, false, false)
+          })
+
       });
     </script>
 
@@ -203,6 +245,15 @@
         </div>
       </div>
     </div>
+
+%(show_name_mapping)s
+%(presenter_name_mapping)s
+
+  <div id="rsab-table-filter">
+    <select name="name">
+      <option value=""></option>
+    </select>
+  </div>
 
   <table id="rsab-playlist">
     <thead>
