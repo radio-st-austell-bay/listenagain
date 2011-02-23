@@ -8,6 +8,7 @@
     <script type="text/javascript">
       $(document).ready(function(){
         $("#jquery_jplayer_rsab").jPlayer({
+          ready: rsab_process_query_parameters,
           cssSelectorAncestor: "#jp_interface_rsab",
           swfPath: "/js",
           supplied: "mp3"
@@ -24,6 +25,33 @@
             $("#jp_playlist_rsab").text($('.rsab-playlist-item-title', this).text())
         })
 
+        function rsab_process_query_parameters() {
+            var query_parameters = window.location.search.replace('?', '').split('&')
+            for(i=0; i<query_parameters.length; i++) {
+                parameter = query_parameters[i]
+                if(parameter == '') {
+                    continue
+                }
+                pos = parameter.indexOf('=')
+                if(pos == -1) {
+                    key = parameter
+                    value = ''
+                }
+                else {
+                    key = parameter.slice(0, pos)
+                    value = parameter.slice(pos + 1)
+                }
+                if(key == 'play') {
+                    matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value*="/' + value + '"]')
+                    if(!matches.length) {
+                        matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value*="' + value + '"]')
+                    }
+                    if(matches.length) {
+                        matches.first().closest('tr.rsab-playlist-item').click()
+                    }
+                }
+            }
+          }
       });
     </script>
 
