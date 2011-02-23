@@ -45,6 +45,13 @@
 #   address for complaints or whatever.
 # - Use jPlayer 'play' event to highlight row, not click handler of row.
 # - upload items from www directory.
+# - styling: clicky pointer.
+# - simple filtering: emit mapping between show/presenter name and English text
+#   in a number of hidden inputs.  In each row put inputs indicating which of
+#   those apply to the row.  At runtime make a drop-down from the master list
+#   which will filter the table.  If somebody asks to filter by a name (URL),
+#   do it.  If the name isn't there, add a temporary "not there" item and
+#   select it (maybe remove it after).
 
 
 
