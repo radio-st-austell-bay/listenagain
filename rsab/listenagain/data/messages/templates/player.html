@@ -1,10 +1,14 @@
 <html>
   <head>
     <title>RSAB: Listen Again</title>
+    <link type="text/css" href="css/flick/jquery-ui-1.8.9.custom.css" rel="stylesheet" />
     <link type="text/css" href="/skin/jplayer.blue.monday.css" rel="stylesheet" />
     <link type="text/css" href="/css/listenagain.css" rel="stylesheet" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
     <script type="text/javascript" src="/js/jquery.jplayer.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="/js/dataTables.fnGetDisplayNodes.js"></script>
 
     <script type="text/javascript">
       $(document).ready(function(){
@@ -19,8 +23,25 @@
         });
         $.jPlayer.timeFormat.showHour = true
 
-        $("#rsab-playlist tr.rsab-playlist-item").click(function () {
-            var row = $(this).closest('tr.rsab-playlist-item')
+        if(typeof String.splitmax == 'undefined') {
+            String.prototype.splitmax = function(sep, n) {
+                n = Math.max(n, 0)
+                if(n == 0) {
+                    return [this.slice()]
+                }
+                all_parts = this.split(sep)
+                n = Math.min(Math.max(n, 0), all_parts.length - 1)
+                result = all_parts.slice(0, n)
+                result.push(all_parts.slice(n).join(sep))
+                return result
+            }
+        }
+
+        function rsab_play_row(row) {
+            if(row == null || typeof row == 'undefined') {
+                return
+            }
+            row = $(row).closest('tr.rsab-playlist-item')
             var filepath = row.find('input[name="src"]').val()
             var ext = filepath.split('.').pop()
             var media = {}
@@ -29,34 +50,125 @@
             $("#jp_playlist_rsab").text($('.rsab-playlist-item-title', this).text())
             row.closest('table').find('.rsab-playlist-item-playing').removeClass('rsab-playlist-item-playing')
             row.addClass('rsab-playlist-item-playing')
+        }
+
+        $("#rsab-playlist tr.rsab-playlist-item").click(function () {
+            rsab_play_row(this)
         })
 
+        $.fn.dataTableExt.oSort['rsab-date-time-desc']  = function(x, y) {
+            // Wrap the HTML in a div so we can use 'find' on it, without
+            // needing to know if what we're looking for was already at the top
+            // level of the HTML or was in a lower level.
+            x = $('<div>'+x+'</div>')
+            y = $('<div>'+y+'</div>')
+            x_compare = x.find('input[name="date_compact"]').val() + x.find('input[name="start_compact"]').val()
+            y_compare = y.find('input[name="date_compact"]').val() + y.find('input[name="start_compact"]').val()
+            return ((x_compare < y_compare) ?  1 : ((x_compare > y_compare) ? -1 : 0));
+        }
+
+        $.fn.dataTableExt.oSort['rsab-date-time-asc']  = function(x, y) {
+            return -1 * $.fn.dataTableExt.oSort['rsab-date-time-desc'](x, y)
+        }
+
+        rsab_table_ready = false
+        rsab_parameters_processed = false
+        rsab_do_autoplay = false
+
+
+        $('#rsab-playlist').dataTable({
+            bPaginate: true,
+            bLengthChange: true,
+            bFilter: false, // we'll use a custom filter
+            bSort: true,
+            bInfo: true,
+            bAutoWidth: true,
+            bJQueryUI: true,
+            sPaginationType: "full_numbers",
+
+            fnInitComplete: function () {
+                rsab_table_ready = true
+                rsab_table_post_init()
+            },
+
+            aaSorting: [ [0, 'desc'] ],
+
+            aoColumns: [
+                { 'sType': 'rsab-date-time' },
+                null,
+                null
+            ]
+        })
+
+        rsab_table_column_names = ['date', 'title', 'duration']
+        rsab_table_initial_sort = []
+
+        function rsab_table_post_init() {
+            if(!rsab_table_ready || !rsab_parameters_processed) {
+                return
+            }
+            table = $('#rsab-playlist').dataTable()
+            if(rsab_table_initial_sort.length) {
+                table.fnSort(rsab_table_initial_sort)
+            }
+            if(rsab_do_autoplay) {
+                rsab_play_row(table.fnGetDisplayNodes()[0])
+            }
+        }
+
         function rsab_process_query_parameters() {
-            var query_parameters = window.location.search.replace('?', '').split('&')
+            var query_parameters = !window.location.search ? [] : (
+                window.location.search[0] == '?'
+                ? window.location.search.slice(1)
+                : window.location.search
+            ).split('&')
             for(i=0; i<query_parameters.length; i++) {
                 parameter = query_parameters[i]
                 if(parameter == '') {
                     continue
                 }
-                pos = parameter.indexOf('=')
-                if(pos == -1) {
-                    key = parameter
-                    value = ''
-                }
-                else {
-                    key = parameter.slice(0, pos)
-                    value = parameter.slice(pos + 1)
-                }
-                if(key == 'play') {
+                temp = parameter.splitmax('=', 1)
+                key = temp[0]
+                value = temp.length == 1 ? '' : temp[1]
+                switch(key) {
+                  case 'findandplay':
                     matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value^="/audio/' + value + '"]')
                     if(!matches.length) {
                         matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value*="' + value + '"]')
                     }
                     if(matches.length) {
-                        matches.first().closest('tr.rsab-playlist-item').click()
+                        rsab_play_row(matches.first().closest('tr.rsab-playlist-item'))
                     }
+                    break
+                  case 'filter':
+                      temp = value.splitmax(':', 1)
+                      filterkey = temp[0]
+                      filtervalue = temp.length == 1 ? '' : temp[1]
+                      // XXX Do something here to apply the filter
+                      break
+                  case 'sort':
+                      if(value && value[0] == '-') {
+                          value = value.slice(1)
+                          ascending = 'desc'
+                      }
+                      else {
+                          if(value && value[0] == '+') {
+                              value = value.slice(1)
+                          }
+                          ascending = 'asc'
+                      }
+                      column_index = rsab_table_column_names.indexOf(value)
+                      if(column_index != -1) {
+                          rsab_table_initial_sort.push( [column_index, ascending] )
+                      }
+                      break
+                  case 'autoplay':
+                      rsab_do_autoplay = true
+                      break
                 }
             }
+            rsab_parameters_processed = true
+            rsab_table_post_init()
           }
       });
     </script>
@@ -93,12 +205,16 @@
     </div>
 
   <table id="rsab-playlist">
-    <tr class="rsab-playlist-heading">
-      <th>Date/Time</th>
-      <th>Show</th>
-      <th>Duration</th>
-    </tr>
+    <thead>
+      <tr class="rsab-playlist-heading">
+        <th>Date/Time</th>
+        <th>Show</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
 %(playlist_items)s
+    </tbody>
   </table>
 
   </body>

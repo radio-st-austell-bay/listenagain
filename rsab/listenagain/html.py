@@ -71,8 +71,11 @@ def make_playlist_item(audio_fname):
         details.get('presenters'),
     )
     template.date = details['date'].strftime('%A %d %B %Y')
+    template.date_compact = details['date'].strftime('%Y%m%d')
     template.start_time = details['start'].strftime('%H:%M')
+    template.start_compact = details['start'].strftime('%H%M')
     template.end_time = details['end'].strftime('%H:%M')
+    template.end_compact = details['end'].strftime('%H%M')
 
     duration = (
         datetime.datetime.combine(details['date'], details['end'])
