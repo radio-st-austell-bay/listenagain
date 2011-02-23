@@ -39,7 +39,12 @@
 # - jPlayer: need a wider seek bar?
 # - Can we supply a time to jPlayer so it doesn't have to download file right
 #   now in order to display duration?
-# - look for info in URL (eg after #) telling us which file to play.
+# - 'ended' event doesn't seem to be firing...
+# - use jQuery to make table prettier, sortable, filterable.
+# - add disclaimer to page about these files not being edited, and contact
+#   address for complaints or whatever.
+# - Use jPlayer 'play' event to highlight row, not click handler of row.
+# - upload items from www directory.
 
 
 
@@ -225,6 +230,9 @@ def run():
         index_fname = html.make_index_file(remote_audio_files)
         if options.upload:
             ftp_conn.storlines('STOR index.html', open(index_fname, 'r'))
+            # XXX Now also sync up anything that's in the www directory
+            # (resource files such as JS, CSS, images, jPlayer...).
+            pass
 
     if ftp_conn is not None:
         ftp_conn.quit()
