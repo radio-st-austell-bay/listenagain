@@ -78,10 +78,11 @@ def make_playlist_item(audio_fname):
         datetime.datetime.combine(details['date'], details['end'])
         - datetime.datetime.combine(details['date'], details['start'])
     ).seconds / 60.0 # approx minutes
-    if duration % 15 < 7.5:
-        duration = divmod(duration, 15)[0] * 15
+    ROUND_TO_MINUTES = 1
+    if duration % ROUND_TO_MINUTES < (ROUND_TO_MINUTES / 2.0):
+        duration = divmod(duration, ROUND_TO_MINUTES)[0] * ROUND_TO_MINUTES
     else:
-        duration = (divmod(duration, 15)[0] + 1) * 15
+        duration = (divmod(duration, ROUND_TO_MINUTES)[0] + 1) * ROUND_TO_MINUTES
     duration_h, duration_m = divmod(duration, 60)
     if duration_m:
         duration_string = '%dh %dm' % (duration_h, duration_m)
