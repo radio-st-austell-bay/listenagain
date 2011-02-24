@@ -1,4 +1,48 @@
 
-tr.rsab-playlist-item-playing {
-    background-color: #eeaaaa;
+#rsab-playlist tr.rsab-playlist-item-playing {
+    background-color: #aaeeaa;
+}
+
+#rsab-playlist tbody tr:hover {
+    cursor: pointer;
+}
+
+#rsab-playlist tbody tr.even:hover, #rsab-playlist tbody tr.even td.highlighted {
+    background-color: #ECFFB3;
+}
+
+#rsab-playlist tbody tr.odd:hover, #rsab-playlist tbody tr.odd td.highlighted {
+    background-color: #E6FF99;
+}
+
+#rsab-playlist tr.even:hover {
+    background-color: #ECFFB3;
+}
+
+#rsab-playlist tr.even:hover td.sorting_1 {
+    background-color: #DDFF75;
+}
+
+#rsab-playlist tr.even:hover td.sorting_2 {
+    background-color: #E7FF9E;
+}
+
+#rsab-playlist tr.even:hover td.sorting_3 {
+    background-color: #E2FF89;
+}
+
+#rsab-playlist tr.odd:hover {
+    background-color: #E6FF99;
+}
+
+#rsab-playlist tr.odd:hover td.sorting_1 {
+    background-color: #D6FF5C;
+}
+
+#rsab-playlist tr.odd:hover td.sorting_2 {
+    background-color: #E0FF84;
+}
+
+#rsab-playlist tr.odd:hover td.sorting_3 {
+    background-color: #DBFF70;
 }
