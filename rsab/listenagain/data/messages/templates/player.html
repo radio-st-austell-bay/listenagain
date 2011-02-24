@@ -47,7 +47,7 @@
             var media = {}
             media[ext] = filepath
             $("#jquery_jplayer_rsab").jPlayer("setMedia", media).jPlayer("play")
-            $("#jp_playlist_rsab").text($('.rsab-playlist-item-title', this).text())
+            $("#jp_playlist_rsab").text($('.rsab-playlist-item-title', row).text())
             row.closest('table').find('.rsab-playlist-item-playing').removeClass('rsab-playlist-item-playing')
             row.addClass('rsab-playlist-item-playing')
         }
