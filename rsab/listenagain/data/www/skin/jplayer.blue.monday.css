@@ -12,6 +12,8 @@
  * Author: Silvia Benvenuti
  * Skin Version: 3.0 (jPlayer 2.0.0)
  * Date: 20th December 2010
+ *
+ * Modified by RSAB.
  */
 
 div.jp-audio,
@@ -44,7 +46,7 @@ div.jp-interface {
 	border:1px solid #009be3;
 }
 div.jp-audio div.jp-type-single div.jp-interface {
-	height:80px;
+	height:120px;
 	border-bottom:none;
 }
 div.jp-audio div.jp-type-playlist div.jp-interface {
@@ -79,8 +81,8 @@ a.jp-pause {
 }
 div.jp-audio div.jp-type-single a.jp-play,
 div.jp-audio div.jp-type-single a.jp-pause {
-	top:20px;
-	left:40px;
+	top:70px;
+	left:20px;
 }
 div.jp-audio div.jp-type-playlist a.jp-play,
 div.jp-audio div.jp-type-playlist a.jp-pause {
@@ -121,12 +123,12 @@ a.jp-pause:hover {
 	background: url("jplayer.blue.monday.jpg") -41px -42px no-repeat;
 }
 div.jp-audio div.jp-type-single a.jp-stop {
-	top:26px;
-	left:90px;
+	top:76px;
+	left:70px;
 }
 div.jp-audio div.jp-type-playlist a.jp-stop {
-	top:26px;
-	left:126px;
+	top:76px;
+	left:106px;
 }
 div.jp-video a.jp-stop {
 	top:21px;
@@ -200,9 +202,9 @@ div.jp-progress {
 	background-color: #ddd;
 }
 div.jp-audio div.jp-type-single div.jp-progress {
-	top:32px;
-	left:130px;
-	width:122px;
+	top:24px;
+	left:20px;
+	width:380px;
 	height:15px;
 }
 div.jp-audio div.jp-type-playlist div.jp-progress {
@@ -243,8 +245,8 @@ a.jp-unmute {
 }
 div.jp-audio div.jp-type-single a.jp-mute,
 div.jp-audio div.jp-type-single a.jp-unmute {
-	top:32px;
-	left:274px;
+	top:82px;
+	left:326px;
 }
 div.jp-audio div.jp-type-playlist a.jp-mute,
 div.jp-audio div.jp-type-playlist a.jp-unmute {
@@ -293,8 +295,8 @@ div.jp-volume-bar {
 	cursor: pointer;
 }
 div.jp-audio div.jp-type-single div.jp-volume-bar {
-	top:37px;
-	left:302px;
+	top:87px;
+	left:354px;
 }
 div.jp-audio div.jp-type-playlist div.jp-volume-bar {
 	top:37px;
@@ -331,13 +333,13 @@ div.jp-duration {
 }
 div.jp-audio div.jp-type-single div.jp-current-time,
 div.jp-audio div.jp-type-single div.jp-duration {
-	top:49px;
-	left:130px;
-	width:122px;
+	top:41px;
+	left:20px;
+	width:380px;
 }
 div.jp-audio div.jp-type-playlist div.jp-current-time,
 div.jp-audio div.jp-type-playlist div.jp-duration {
-	top:49px;
+	top:41px;
 	left:164px;
 	width:122px;
 }
