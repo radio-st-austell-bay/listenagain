@@ -1,9 +1,22 @@
 
+div#rsab-table-filter {
+    padding: 5px;
+}
+
+#rsab-playlist tr.rsab-playlist-item-unavailable {
+    color: #aaaaaa;
+    cursor: default;
+}
+
+#rsab-playlist tr.rsab-playlist-item-live {
+
+}
+
 #rsab-playlist tr.rsab-playlist-item-playing {
     background-color: #aaeeaa;
 }
 
-#rsab-playlist tbody tr:hover {
+#rsab-playlist tbody tr.rsab-playlist-item:hover {
     cursor: pointer;
 }
 

@@ -70,8 +70,9 @@ def make_playlist_item(audio_fname):
         details['show'],
         details.get('presenters'),
     )
-    template.date = details['date'].strftime('%A %d %B %Y')
+    template.date = details['date'].strftime('%a %d %b %Y')
     template.date_compact = details['date'].strftime('%Y%m%d')
+    template.day_short = details['date'].strftime('%a').lower()
     template.start_time = details['start'].strftime('%H:%M')
     template.start_compact = details['start'].strftime('%H%M')
     template.end_time = details['end'].strftime('%H:%M')

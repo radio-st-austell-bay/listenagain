@@ -12,8 +12,36 @@
 
     <script type="text/javascript">
       $(document).ready(function(){
+
+        RSAB = {}
+        RSAB.ready_flags = {
+            // XXX Can't seem to get the jPlayer events to fire...
+            //jplayer: false,
+            table: false,
+            params: false,
+            live: false
+        }
+        RSAB.options = {
+            autoplay: false
+        }
+
+        RSAB.fn = {}
+        RSAB.fn.go_if_ready = function (flag) {
+            if(typeof flag != 'undefined') {
+                RSAB.ready_flags[flag] = true
+            }
+            for(key in RSAB.ready_flags) {
+                if(!RSAB.ready_flags[key]) {
+                    return
+                }
+            }
+            RSAB.fn.go()
+        }
+
         $("#jquery_jplayer_rsab").jPlayer({
-          ready: rsab_process_query_parameters,
+          ready: function () {
+              RSAB.fn.go_if_ready('jplayer')
+          },
           ended: function () {
               $('#rsab-playlist tr.rsab-playlist-item-playing').removeClass('rsab-playlist-item-playing')
           },
@@ -37,23 +65,26 @@
             }
         }
 
-        function rsab_play_row(row) {
+        RSAB.fn.play_row = function (row) {
             if(row == null || typeof row == 'undefined') {
                 return
             }
             row = $(row).closest('tr.rsab-playlist-item')
+            if(row.hasClass('rsab-playlist-item-unavailable')) {
+                return
+            }
             var filepath = row.find('input[name="src"]').val()
             var ext = filepath.split('.').pop()
             var media = {}
             media[ext] = filepath
             $("#jquery_jplayer_rsab").jPlayer("setMedia", media).jPlayer("play")
             $("#jp_playlist_rsab").text($('.rsab-playlist-item-title', row).text())
-            row.closest('table').find('.rsab-playlist-item-playing').removeClass('rsab-playlist-item-playing')
+            row.closest('table').find('.rsab-playlist-item-playing').not(row).removeClass('rsab-playlist-item-playing')
             row.addClass('rsab-playlist-item-playing')
         }
 
-        $("#rsab-playlist tr.rsab-playlist-item").click(function () {
-            rsab_play_row(this)
+        $("#rsab-playlist tr.rsab-playlist-item").bind('click.play', function () {
+            RSAB.fn.play_row(this)
         })
 
         $.fn.dataTableExt.oSort['rsab-date-time-desc']  = function(x, y) {
@@ -71,6 +102,11 @@
             return -1 * $.fn.dataTableExt.oSort['rsab-date-time-desc'](x, y)
         }
 
+        $.fn.dataTableExt.ofnSearch['rsab-date-time']  = function(sData) {
+            cell = $('<div>'+sData+'</div>')
+            return cell.find('input[name=day_short]').val()
+        }
+
         $.fn.dataTableExt.oSort['rsab-title-desc'] = $.fn.dataTableExt.oSort['string-desc']
         $.fn.dataTableExt.oSort['rsab-title-asc'] = $.fn.dataTableExt.oSort['string-asc']
 
@@ -82,11 +118,6 @@
             })
             return ',' + names.join(',') + ','
         }
-
-        rsab_table_ready = false
-        rsab_parameters_processed = false
-        rsab_do_autoplay = false
-
 
         $('#rsab-playlist').dataTable({
             bPaginate: true,
@@ -100,8 +131,7 @@
             sDom: '<"H"lr>t<"F"ip>',
 
             fnInitComplete: function () {
-                rsab_table_ready = true
-                rsab_table_post_init()
+                RSAB.fn.go_if_ready('table')
             },
 
             aaSorting: [ [0, 'desc'] ],
@@ -113,23 +143,63 @@
             ]
         })
 
+        RSAB.fn.no_live_stream = function () {
+          $('#rsab-playlist tr.rsab-playlist-item-live')
+            .addClass('rsab-playlist-item-unavailable')
+            .unbind('click.play')
+            .find('.rsab-playlist-item-title').text('Live stream unavailable')
+        }
+
+        $.ajax({
+          accepts: 'audio/x-mpegurl',
+          cache: false,
+          url: '/listen.m3u',
+          dataType: 'text',
+          success: function (data, textStatus, jqXHR) {
+              url_finder = new RegExp('^http(?:s?)://.+', 'im')
+              live_url_array = url_finder.exec(data)
+              if(live_url_array.length) {
+                $('#rsab-playlist tr.rsab-playlist-item-live')
+                  .find('.rsab-playlist-item-title').text('Live stream')
+                  .end()
+                  .find('input[name=src]').val(live_url_array[0])
+              }
+              else {
+                RSAB.fn.no_live_stream()
+              }
+              RSAB.fn.go_if_ready('live')
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+              RSAB.fn.no_live_stream()
+              RSAB.fn.go_if_ready('live')
+          },
+        })
+
+
         rsab_table_column_names = ['date', 'title', 'duration']
         rsab_table_initial_sort = []
 
-        function rsab_table_post_init() {
-            if(!rsab_table_ready || !rsab_parameters_processed) {
-                return
-            }
+        RSAB.fn.go = function () {
             table = $('#rsab-playlist').dataTable()
             if(rsab_table_initial_sort.length) {
                 table.fnSort(rsab_table_initial_sort)
             }
-            if(rsab_do_autoplay) {
-                rsab_play_row(table.fnGetDisplayNodes()[0])
+            if(RSAB.options.autoplay) {
+                row = $('#rsab-playlist tr.rsab-playlist-item-playing').first()
+                if(row.length == 0) {
+                    row = null
+                    visible_rows = table.fnGetDisplayNodes()
+                    if(visible_rows.length != 0) {
+                        row = visible_rows[0]
+                    }
+                }
+                if(row) {
+                    RSAB.fn.play_row(row)
+                }
             }
         }
 
-        function rsab_process_query_parameters() {
+        RSAB.fn.process_parameters = function () {
             var query_parameters = !window.location.search ? [] : (
                 window.location.search[0] == '?'
                 ? window.location.search.slice(1)
@@ -144,20 +214,36 @@
                 key = temp[0]
                 value = temp.length == 1 ? '' : temp[1]
                 switch(key) {
-                  case 'findandplay':
-                    matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value^="/audio/' + value + '"]')
-                    if(!matches.length) {
-                        matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value*="' + value + '"]')
+                  case 'find':
+                    if(value == 'live') {
+                        matches = $('#rsab-playlist tr.rsab-playlist-item-live')
+                    }
+                    else {
+                      matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value^="/audio/' + value + '"]')
+                      if(!matches.length) {
+                          matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value*="' + value + '"]')
+                      }
                     }
                     if(matches.length) {
-                        rsab_play_row(matches.first().closest('tr.rsab-playlist-item'))
+                        matches.first().closest('tr.rsab-playlist-item').addClass('rsab-playlist-item-playing')
                     }
                     break
-                  case 'namefilter':
+                  case 'live':
+                    $('#rsab-playlist tr.rsab-playlist-item-live').addClass('rsab-playlist-item-playing')
+                    break
+                  case 'show':
                       rsab_select = $('#rsab-table-filter select[name=name]')
                       rsab_option = rsab_select.find('option[value="'+value+'"]')
                       if(rsab_option.length == 0) {
                           value = '!'
+                      }
+                      rsab_select.val(value).change()
+                      break
+                  case 'day':
+                      rsab_select = $('#rsab-table-filter select[name=day]')
+                      rsab_option = rsab_select.find('option[value="'+value+'"]')
+                      if(rsab_option.length == 0) {
+                          value = ''
                       }
                       rsab_select.val(value).change()
                       break
@@ -178,14 +264,16 @@
                       }
                       break
                   case 'autoplay':
-                      rsab_do_autoplay = true
+                      RSAB.options.autoplay = true
                       break
                 }
             }
-            rsab_parameters_processed = true
-            rsab_table_post_init()
+            RSAB.fn.go_if_ready('params')
           }
 
+          // XXX This will have to be moved around if the table rows get pulled
+          // in by AJAX.  And 'process_parameters' mustn't be called until this
+          // has been run...
           rsab_select_pairs = []
           rsab_select_pairs_seen = {}
           $('input[name=showname], input[name=presentername]').each(function () {
@@ -198,6 +286,7 @@
               }
           })
           rsab_select_pairs.sort()
+
           rsab_select = $('#rsab-table-filter select[name=name]')
           for(i = 0; i < rsab_select_pairs.length; i++) {
               $('<option value="' + rsab_select_pairs[i][0] + '"></option>')
@@ -212,6 +301,12 @@
               }
               $('#rsab-playlist').dataTable().fnFilter(value, 1, false, false)
           })
+
+          $('#rsab-table-filter select[name=day]').change(function () {
+              $('#rsab-playlist').dataTable().fnFilter($(this).find('option:selected').val(), 0, false, false)
+          })
+
+          RSAB.fn.process_parameters()
 
       });
     </script>
@@ -250,24 +345,56 @@
 %(show_name_mapping)s
 %(presenter_name_mapping)s
 
-  <div id="rsab-table-filter">
-    <select name="name">
-      <option value=""></option>
-    </select>
-  </div>
+  <div class="ui-widget">
+    <div id="rsab-table-filter">
+      <div class="ui-widget-header">
+        Filter shows
+      </div>
+      Day:
+      <select name="day">
+        <option value=""></option>
+        <option value="mon">Monday</option>
+        <option value="tue">Tuesday</option>
+        <option value="wed">Wednesday</option>
+        <option value="thu">Thursday</option>
+        <option value="fri">Friday</option>
+        <option value="sat">Saturday</option>
+        <option value="sun">Sunday</option>
+      </select>
+      Show/Presenter:
+      <select name="name">
+        <option value=""></option>
+      </select>
+    </div>
 
-  <table id="rsab-playlist">
-    <thead>
-      <tr class="rsab-playlist-heading">
-        <th>Date/Time</th>
-        <th>Show</th>
-        <th>Duration</th>
-      </tr>
-    </thead>
-    <tbody>
+    <table id="rsab-playlist" class="ui-widget-content">
+      <thead>
+        <tr class="rsab-playlist-heading">
+          <th>Date/Time</th>
+          <th>Show</th>
+          <th>Duration</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="rsab-playlist-item rsab-playlist-item-live">
+          <td class="rsab-playlist-item-when">
+            <input type="hidden" name="src" value="" disabled="disabled" />
+            <input type="hidden" name="date_compact" value="99991231" disabled="disabled" />
+            <input type="hidden" name="start_compact" value="2359" disabled="disabled" />
+            <span class="rsab-playlist-item-date">Now</span>
+          </td>
+          <td class="rsab-playlist-item-show">
+            <input type="hidden" disabled="disabled" name="show" value="live" />
+            <span class="rsab-playlist-item-title">Live stream</span>
+          </td>
+          <td class="rsab-playlist-item-duration">
+          </td>
+        </tr>
+
 %(playlist_items)s
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  </div>
 
   </body>
 </html>
