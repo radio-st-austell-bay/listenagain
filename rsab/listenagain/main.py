@@ -21,7 +21,6 @@
 #   attributes (not dynamic as we must distinguish between cases where we've
 #   read the schedule file and parsed file names), show and presenter names and
 #   methods for translating them.
-# - write a class to write a progress bar to stdout for when making WAVs.
 # - make RSS feeds when we make the index.
 # - error-handling for FTP: what if we can't get access to the server?  What if
 #   we have it but lose it?  (We need to make an index file which covers the
@@ -32,9 +31,6 @@
 #   don't upload.  If it's smaller, resume if possible rather than uploading.
 #   If we lose the connection, sleep and retry up to some limit -- last night
 #   it seems there was a blip in the connection.
-# - Speed up WAV generation: seek from current pos (should be end of header) in
-#   WAV when skipping.  Skip frames times frame width bytes.  Test each method
-#   and compare output: if identical, we can make this part faster!
 # - Web server: need it to support ranges.
 # - jPlayer: need a wider seek bar?
 # - Can we supply a time to jPlayer so it doesn't have to download file right
@@ -43,16 +39,35 @@
 # - use jQuery to make table prettier, sortable, filterable.
 # - add disclaimer to page about these files not being edited, and contact
 #   address for complaints or whatever.
-# - Use jPlayer 'play' event to highlight row, not click handler of row.
+# - Use jPlayer 'play' event to highlight row, not click handler of row. ?
 # - upload items from www directory.
-# - styling: clicky pointer.
-# - simple filtering: emit mapping between show/presenter name and English text
-#   in a number of hidden inputs.  In each row put inputs indicating which of
-#   those apply to the row.  At runtime make a drop-down from the master list
-#   which will filter the table.  If somebody asks to filter by a name (URL),
-#   do it.  If the name isn't there, add a temporary "not there" item and
-#   select it (maybe remove it after).
-
+# - Live:
+#   - Add extra field to schedule: "record".  If 0, we don't record.
+#   - Parse schedule for next day and generate records to use for Live.  Every
+#     minute or so, update text in playlist (and in now playing if required) if
+#     the schedule indicates the program has changed.  Update filtering too.
+#   - Have text for Record Spinning Auto Bot for when there's no show on.
+# - Separation:
+#   - Use ajax to retrieve table content.
+# - Cosmetic:
+#   - Disclaimer
+#   - Having trouble? dialog with HTML5/Flash text and link to M3U.
+# - FTP:
+#   - Delete MP3 after uploading.
+#   - New FTP method to check existence and correct size.
+#   - MP3 upload method: return success if file already there and of correct
+#     size (so it can be deleted).  Return success if upload succeeds.  Trap
+#     errors and return failure.
+#   - Maintain dict mapping consecutive failures to seconds of wait (and None
+#     key for anything above highest explicit int key).  Each time an FTP
+#     method fails, increment the failures counter and wait appropriately.  If
+#     a method succeeds, reset the consecutive failures counter (but keep the
+#     total failures counter, which we'll test against a max allowed failures
+#     number, which will be relative to the number of files).  We may want to
+#     wrap this logic up in a wrapper method which the FTP class applies to all
+#     server-connecting methods.  Or to just those which are uploading?  Put
+#     try/except in wrapper around all methods, but only increment total
+#     counter for uploads?
 
 
 def run():
