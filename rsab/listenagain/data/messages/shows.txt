@@ -1,3 +1,4 @@
+autodj = Record Spinning Auto Bot
 baywatch = Pam's Bay Watch
 brassinthebay = Brass In The Bay
 breakfast = Breakfast
