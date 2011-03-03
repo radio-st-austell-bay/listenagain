@@ -207,7 +207,7 @@ def run():
             keep_days = config.getint('ftp', 'keep_days')
         else:
             keep_days = 7
-        earliest_keep_date = date - datetime.timedelta(days=keep_days)
+        earliest_keep_date = date - datetime.timedelta(days=keep_days-1)
         ftp_conn = remote.connect()
         remote_audio_files = ftp_conn.get_list_of_audio_files()
 
@@ -218,7 +218,7 @@ def run():
                 (fname, schedule.schedule_from_audio_file_name(fname))
                 for fname in remote_audio_files
             ]
-            if details is not None and details['date'] > earliest_keep_date
+            if details is not None and details['date'] >= earliest_keep_date
         ]
 
         index_fname = html.make_index_file(audio_files_for_first_index)
