@@ -1,4 +1,30 @@
 
+body {
+    margin-top: 0px;
+    text-align: center; /* center things in pre-IE6 */
+    background:url(/images/stripe_bg.png);
+}
+
+#rsab-main-container {
+    margin: 35px auto;
+    width: 760px;
+    border: medium solid #000000;
+    background:#CCCCCC;
+}
+
+#rsab-page-heading .title {
+    font-size: xx-large;
+}
+
+#rsab-logo {
+    float: right;
+}
+
+/* Correct alignment defined on body. */
+.jp-interface {
+    text-align: left;
+}
+
 div#rsab-table-filter {
     padding: 5px;
 }
@@ -59,3 +85,14 @@ div#rsab-table-filter {
 #rsab-playlist tr.odd:hover td.sorting_3 {
     background-color: #DBFF70;
 }
+
+#rsab-not-live-warning,
+#rsab-problems {
+    display: inline-block;
+    cursor: help;
+}
+
+#rsab-jp-player-ui {
+    padding: 5px;
+}
+
