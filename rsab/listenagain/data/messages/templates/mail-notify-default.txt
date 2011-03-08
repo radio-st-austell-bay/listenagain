@@ -1,0 +1,14 @@
+Hi,
+
+This is the Listen Again Robot at Radio St Austell Bay. The following
+files are now available to be downloaded:
+
+%(files)s
+
+They will be deleted after %(keep_days)s days.
+
+Yours,
+Listen Again Robot
+
+-- 
+http://rsab.org
