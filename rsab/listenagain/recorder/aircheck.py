@@ -30,7 +30,10 @@ def get_bounds_and_files_for_date(date):
             from rsab.listenagain import ListenAgainDataError
             raise ListenAgainDataError('File name not in format YYYYMMDDhhmmss.wav', path_and_file)
         start = datetime.datetime(date.year, date.month, date.day, hh, mm, ss)
-        w = wave.open(path_and_file, 'rb')
+        try:
+            w = wave.open(path_and_file, 'rb')
+        except wave.Error:
+            continue
         frames = w.getnframes()
         rate = w.getframerate()
         end = start + datetime.timedelta(seconds=frames/float(rate))
