@@ -1,6 +1,6 @@
 Files in schedule/ must be in CSV format (and must have either 'csv' or 'txt'
 extension; the latter is useful for editing in Notepad).  There must be no
-heading row.  The 7 columns must be:
+heading row.  The 8 columns must be:
 
 1. Day of the week.  One of the following: mon tue wed thu fri sat sun
 2. Start time. Format: hhmm
@@ -11,8 +11,10 @@ heading row.  The 7 columns must be:
 5. End padding (override).  This value overrides the global end padding
    configured in the INI file; leave blank to accept the default.  The end
    padding adds time to the end of the show; it's a whole number of seconds.
-6. Show code name.
-7. Optional list of presenter code names, separated by semicolons.
+6. Record?  1 to record, or 0 to skip.
+7. Show code name.  If the name starts with 'xx' it won't be shown in the
+   Listen Again player.
+8. Optional list of presenter code names, separated by semicolons.
 
 
 A file in schedule/ is named after the date on which that schedule comes into

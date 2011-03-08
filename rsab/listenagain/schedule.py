@@ -9,7 +9,7 @@ def get_dow_number(day_string):
     return None
 
 
-def read_schedule_file(fname, dow=None, require_dow=True):
+def read_schedule_file(date, fname, dow=None, require_dow=True):
     import csv
     import datetime
     import re
@@ -28,12 +28,12 @@ def read_schedule_file(fname, dow=None, require_dow=True):
             continue
         if row[0] and row[0][0] in [';', '#']: # skip comments
             continue
-        if len(row) < 6:
-            raise_error('Row must have at least 6 (preferably 7) items', row)
-        if len(row) == 6:
+        if len(row) < 7:
+            raise_error('Row must have at least 7 (preferably 8) items', row)
+        if len(row) == 7:
             row.append('')
-        elif len(row) > 7:
-            del row[7:]
+        elif len(row) > 8:
+            del row[8:]
 
         dow_number = get_dow_number(row[0])
         if require_dow and dow_number is None:
@@ -68,22 +68,40 @@ def read_schedule_file(fname, dow=None, require_dow=True):
         else:
             row[4] = None
 
-        row[5] = row[5].strip().lower()
-        if not row[5] or ',' in row[5]:
-            raise_error('Show name is not valid', row[5])
+        if row[5]:
+            try:
+                row[5] = bool(int(row[5]))
+            except ValueError:
+                raise_error('Error converting record flag to bool', row[5])
+        else:
+            row[5] = False
 
-        row[6] = [x.strip() for x in row[6].lower().split(';') if x.strip()]
-        while row[5] in row[6]:
-            row[6].remove(row[5])
+        row[6] = row[6].strip().lower()
+        if not row[6] or ',' in row[6]:
+            raise_error('Show name is not valid', row[6])
 
-        all_rows.append(row)
+        row[7] = [x.strip() for x in row[7].lower().split(';') if x.strip()]
+        while row[6] in row[7]:
+            row[7].remove(row[6])
+
+        details = {
+            'date': date,
+            'start': row[1],
+            'end': row[2],
+            'pad_start': row[3],
+            'pad_end': row[4],
+            'record': row[5],
+            'show': row[6],
+            'presenters': row[7]
+        }
+        all_rows.append( (row, details) )
 
     row_number = None
     all_rows.sort()
-    return all_rows
+    return [details for (row, details) in all_rows]
 
 
-def get_schedule(date):
+def get_schedule(date, filter_items=None):
     import datetime
     import glob
     import os
@@ -128,6 +146,7 @@ def get_schedule(date):
         schedule_from_file = []
     else:
         schedule_from_file = read_schedule_file(
+            date,
             schedule_file_path,
             dow=date.weekday(),
             require_dow=require_dow,
@@ -140,12 +159,19 @@ def get_schedule(date):
         pad_end = config.getint('main', 'padend')
 
     schedule = []
-    for record in schedule_from_file:
-        if record[3] is None: # pad start
-            record[3] = pad_start
-        if record[4] is None: # pad end
-            record[4] = pad_end
-        schedule.append(record[1:]) # don't need DOW now
+    for details in schedule_from_file:
+        if filter_items:
+            for filter_item in filter_items:
+                if filter_item == details['show'] \
+                or filter_item in details.get('presenters', []):
+                    break
+            else:
+                continue
+        if details.get('pad_start') is None:
+            details['pad_start'] = pad_start
+        if details.get('pad_end') is None:
+            details['pad_end'] = pad_end
+        schedule.append(details)
 
     return schedule
 
@@ -155,20 +181,19 @@ def print_schedule(schedule_list):
         print '(Schedule is empty)'
         return
 
-    for schedule_item in schedule_list:
-        print get_schedule_item_as_string(schedule_item)
+    for details in schedule_list:
+        print get_schedule_item_as_string(details)
 
 
-def get_schedule_item_as_string(schedule_item):
+def get_schedule_item_as_string(details):
     # XXX This looks rubbish but it will do...
-    time_start, time_end, pad_start, pad_end, show, presenters = schedule_item
     components = [
-        time_start.strftime('%H:%M:%S'),
-        '(-%4.ds)' % pad_start,
-        time_end.strftime('%H:%M:%S'),
-        '(+%4.ds)' % pad_end,
-        '%-20s' % show,
-        ','.join(presenters),
+        details['start'].strftime('%H:%M:%S'),
+        '(-%4.ds)' % details.get('pad_start', 0),
+        details['end'].strftime('%H:%M:%S'),
+        '(+%4.ds)' % details.get('pad_end', 0),
+        '%-20s' % details['show'],
+        ','.join(details.get('presenters', [])),
     ]
     return ' '.join(components)
 
@@ -200,6 +225,7 @@ def schedule_from_audio_file_name(fname):
         'date': datetime.date(int(groups[0]), int(groups[1]), int(groups[2])),
         'start': datetime.time(int(groups[3]), int(groups[4]), int(groups[5])),
         'end': datetime.time(int(groups[6]), int(groups[7]), int(groups[8])),
+        'record': False,
         'show': groups[9].strip(),
         'presenters': filter(None, [p.strip() for p in groups[10].split(',')]),
         'extra': groups[11],
