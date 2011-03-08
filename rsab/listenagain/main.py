@@ -7,12 +7,8 @@
 # - add function to make log file (named after date, with (2) if nec.)
 # - be more verbose
 # - email log
-# - encode new WAV files
 # - option to time construction of a WAV file of N seconds (for tuning frame
 #   chunk size config value).
-# - options to do some things but not others:
-#   -i: make index pages (using all MP3s found)
-#   -u: upload MP3s and index files, and delete old MP3s from server
 # - option to not delete working files
 # - allow multiple arguments for multiple dates.  Wrap up the relevant bits of
 #   this function in a loop.
@@ -32,26 +28,19 @@
 #   If we lose the connection, sleep and retry up to some limit -- last night
 #   it seems there was a blip in the connection.
 # - Web server: need it to support ranges.
-# - jPlayer: need a wider seek bar?
 # - Can we supply a time to jPlayer so it doesn't have to download file right
 #   now in order to display duration?
 # - 'ended' event doesn't seem to be firing...
-# - use jQuery to make table prettier, sortable, filterable.
-# - add disclaimer to page about these files not being edited, and contact
-#   address for complaints or whatever.
 # - Use jPlayer 'play' event to highlight row, not click handler of row. ?
 # - upload items from www directory.
 # - Live:
-#   - Add extra field to schedule: "record".  If 0, we don't record.
 #   - Parse schedule for next day and generate records to use for Live.  Every
 #     minute or so, update text in playlist (and in now playing if required) if
 #     the schedule indicates the program has changed.  Update filtering too.
-#   - Have text for Record Spinning Auto Bot for when there's no show on.
+#   - Use this information to generate the main schedule page on the site, with
+#     links to LA (when that's live).
 # - Separation:
 #   - Use ajax to retrieve table content.
-# - Cosmetic:
-#   - Disclaimer
-#   - Having trouble? dialog with HTML5/Flash text and link to M3U.
 # - FTP:
 #   - Delete MP3 after uploading.
 #   - New FTP method to check existence and correct size.
@@ -68,6 +57,10 @@
 #     server-connecting methods.  Or to just those which are uploading?  Put
 #     try/except in wrapper around all methods, but only increment total
 #     counter for uploads?
+# - Keyboard shortcuts for web page.
+# - Gain-change alternatives?
+# - Delete local copies of MP3s more than N days old.
+
 
 
 def run():
@@ -79,6 +72,7 @@ def run():
 
     import audio
     import html
+    import notify
     import utils
     import recorder
     import remote
@@ -88,7 +82,7 @@ def run():
     option_parser.add_option(
         '-p',
         '--print',
-        dest='print_only',
+        dest='print_schedule',
         action='store_true',
         default=False,
         help="Print information about the date but don't do anything",
@@ -138,18 +132,34 @@ def run():
         metavar='FILE',
     )
 
+    option_parser.add_option(
+        '-f',
+        '--filter',
+        dest='filter',
+        action='append',
+        help="Filter schedule to items containing at least one of the given show/presenter",
+        metavar='NAME',
+    )
+
+
     options, args = option_parser.parse_args()
 
-    # Print only: do nothing else.
-    if options.print_only:
-        options.wavs = options.encode = options.index = options.upload = False
-
+    task_options = [
+        'print_schedule',
+        'wavs',
+        'encode',
+        'index',
+        'upload',
+    ]
+    num_task_options_supplied = len([
+        None
+        for option_name in task_options
+        if getattr(options, option_name, False)
+    ])
     # No specific do-something options were given.  Do everything.
-    elif not options.wavs and not options.encode and not options.index and not options.upload:
-        options.wavs = True
-        options.encode = True
-        options.index = True
-        options.upload = True
+    if num_task_options_supplied == 0:
+        for option_name in task_options:
+            setattr(options, option_name, True)
 
     config_files = utils.default_config_files()
     if options.config_file is not None:
@@ -165,10 +175,13 @@ def run():
 
     recorder.init_module()
     bounds_and_files = recorder.get_bounds_and_files_for_date(date)
-    schedule_list = schedule.get_schedule(date)
+    schedule_list = schedule.get_schedule(date, filter_items=options.filter)
 
-    if options.wavs or options.print_only:
-        print 'Schedule:'
+    if options.wavs or options.print_schedule:
+        if options.filter:
+            print 'Schedule (filtered):'
+        else:
+            print 'Schedule:'
         schedule.print_schedule(schedule_list)
         print
         print 'Recordings:'
@@ -176,11 +189,12 @@ def run():
 
     wav_files = None
     if options.wavs:
-        wav_files = audio.make_wav_files(date, bounds_and_files, schedule_list)
+        wav_files = audio.make_wav_files(bounds_and_files, schedule_list)
 
     mp3_files = None
     if options.encode:
-        if wav_files is None:
+        # Always rebuild WAVs list in case any are hanging around from before.
+        if True:#wav_files is None:
             if config.has_option('main', 'wavs'):
                 wavs_dir = config.get('main', 'wavs')
             else:
@@ -221,14 +235,19 @@ def run():
             if details is not None and details['date'] >= earliest_keep_date
         ]
 
-        index_fname = html.make_index_file(audio_files_for_first_index)
+        index_fname = html.make_index_file(date, audio_files_for_first_index)
         if options.upload:
             ftp_conn.storlines('STOR index.html', open(index_fname, 'r'))
 
     if options.upload:
         ftp_conn.remove_old_audio(earliest_keep_date)
 
-        if mp3_files is None:
+        # XXX Here we should delete local copies of MP3s that are more than N
+        # days old, in case the upload has failed for more than N days.
+        pass
+
+        # Always build the list again as we can pick up files we missed before.
+        if True:#mp3_files is None:
             if config.has_option('main', 'mp3s'):
                 mp3s_dir = config.get('main', 'mp3s')
             else:
@@ -246,10 +265,12 @@ def run():
             print 'done.'
             print
 
+        notify.notify_all(mp3_files)
+
     if options.index:
         # Second index file: whatever's on the server.
         remote_audio_files = ftp_conn.get_list_of_audio_files()
-        index_fname = html.make_index_file(remote_audio_files)
+        index_fname = html.make_index_file(date, remote_audio_files)
         if options.upload:
             ftp_conn.storlines('STOR index.html', open(index_fname, 'r'))
             # XXX Now also sync up anything that's in the www directory
@@ -260,7 +281,7 @@ def run():
         ftp_conn.quit()
 
     end_time = time.time()
-    if not options.print_only:
+    if not options.print_schedule:
         duration = end_time - start_time
         print 'Took %2.2dm %2.2ds' % divmod(duration, 60)
 
@@ -270,4 +291,3 @@ def run():
 
 if __name__ == '__main__':
     run()
-
