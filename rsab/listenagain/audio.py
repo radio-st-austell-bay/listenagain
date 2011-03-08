@@ -1,6 +1,6 @@
 
 # XXX Going to just start writing then refactor later...
-def make_wav_files(date, bounds_and_files, schedule_list):
+def make_wav_files(bounds_and_files, schedule_list):
     import datetime
     import os
     import wave
@@ -34,24 +34,25 @@ def make_wav_files(date, bounds_and_files, schedule_list):
 
     output_wav_files = []
     bounds_and_files.sort()
-    for schedule_item in schedule_list:
-        time_start, time_end, pad_start, pad_end, show, presenters = schedule_item
-        actual_time_start = utils.apply_padding(time_start, pad_start, subtract=True)
-        actual_time_start = datetime.datetime.combine(date, actual_time_start)
-        actual_time_end = utils.apply_padding(time_end, pad_end, subtract=False)
-        actual_time_end = datetime.datetime.combine(date, actual_time_end)
+    for details in schedule_list:
+        if not details['record']:
+            continue
+        actual_time_start = utils.apply_padding(details['start'], details.get('pad_start', 0), subtract=True)
+        actual_time_start = datetime.datetime.combine(details['date'], actual_time_start)
+        actual_time_end = utils.apply_padding(details['end'], details.get('pad_end', 0), subtract=False)
+        actual_time_end = datetime.datetime.combine(details['date'], actual_time_end)
 
         print
-        print 'Schedule:', schedule.get_schedule_item_as_string(schedule_item)
+        print 'Schedule:', schedule.get_schedule_item_as_string(details)
 
-        output_file_name = os.path.join(output_dir, make_output_file_name(date, schedule_item, 'wav'))
+        output_file_name = os.path.join(output_dir, make_output_file_name(details, 'wav'))
         print 'Output file:', os.path.split(output_file_name)[1]
 
         wav_writer = wave.open(output_file_name, 'wb')
         wav_writer.setparams(output_wav_params)
         for wav_file_start, wav_file_end, wav_file_path in bounds_and_files:
-            if wav_file_start.date() != date \
-            or wav_file_end.date() != date \
+            if wav_file_start.date() != details['date'] \
+            or wav_file_end.date() != details['date'] \
             or wav_file_end <= actual_time_start \
             or wav_file_start >= actual_time_end:
                 continue
@@ -97,13 +98,12 @@ def make_wav_files(date, bounds_and_files, schedule_list):
     return output_wav_files
 
 
-def make_output_file_name(date, schedule_item, ext, extra=None):
-    time_start, time_end, pad_start, pad_end, show, presenters = schedule_item
+def make_output_file_name(details, ext, extra=None):
     base_items = [
-        date.strftime('%Y%m%d'),
-        time_start.strftime('%H%M%S'),
-        time_end.strftime('%H%M%S'),
-        ','.join([show] + (presenters or [])),
+        details['date'].strftime('%Y%m%d'),
+        details['start'].strftime('%H%M%S'),
+        details['end'].strftime('%H%M%S'),
+        ','.join([details['show']] + (details.get('presenters', []))),
     ]
     if extra:
         base_items.append(extra)
