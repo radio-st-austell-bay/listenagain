@@ -65,6 +65,8 @@ def make_playlist_item(audio_fname):
         audio_path += '/'
 
     details = schedule.schedule_from_audio_file_name(audio_fname)
+    if details['show'].startswith('xx'):
+        return ''
     template = Template('playlist-item')
     template.title = utils.get_show_title_string(
         details['show'],
@@ -106,7 +108,8 @@ def make_playlist_item(audio_fname):
     return template
 
 
-def make_index_file(audio_fname_list, output_fname=None):
+def make_index_file(date, audio_fname_list, output_fname=None):
+    import datetime
     import os
 
     import schedule
@@ -123,11 +126,15 @@ def make_index_file(audio_fname_list, output_fname=None):
     template = Template('player')
 
     playlist_items = []
+    details_for_audio_files = []
     show_name_mapping = {}
     presenter_name_mapping = {}
     for audio_fname in audio_fname_list:
         playlist_items.append(str(make_playlist_item(audio_fname)))
-        details = schedule.schedule_from_audio_file_name(audio_fname)
+        details_for_audio_files.append(schedule.schedule_from_audio_file_name(audio_fname))
+
+    live_schedule = schedule.get_schedule(date + datetime.timedelta(days=1))
+    for details in details_for_audio_files + live_schedule:
         show_name = details['show']
         show_title = utils.get_message(show_name, 'show', default=None)
         if show_title is None:
@@ -140,7 +147,7 @@ def make_index_file(audio_fname_list, output_fname=None):
             if presenter not in presenter_name_mapping:
                 presenter_name_mapping[presenter] = utils.get_message(presenter, 'presenter', default=presenter)
 
-    template.playlist_items = '\n'.join(playlist_items)
+    template.playlist_items = '\n'.join(filter(None, playlist_items))
     hidden_input = '<input type="hidden" disabled="disabled" name="%s" value="%s" />'
     template.show_name_mapping = '\n'.join([
         hidden_input % ('showname', '%s:%s' % pair)
@@ -150,6 +157,17 @@ def make_index_file(audio_fname_list, output_fname=None):
         hidden_input % ('presentername', '%s:%s' % pair)
         for pair in presenter_name_mapping.items()
     ])
+    template.live_schedule = '\n'.join([
+        hidden_input % (
+            'live_schedule',
+            '%s:%s' % (
+                details['start'].strftime('%H:%M'),
+                ','.join([details['show']] + details.get('presenters', [])),
+            ),
+        )
+        for details in schedule.get_schedule(date + datetime.timedelta(days=1))
+    ])
+
     output_file.write(str(template))
     output_file.close()
     return output_fname
