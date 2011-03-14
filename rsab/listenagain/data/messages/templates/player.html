@@ -106,6 +106,12 @@
             RSAB.fn.play_row(this)
         })
 
+        $('.rsab-player-domain-generic').each(function () {
+            $(this).text(window.location.hostname)
+              .removeClass('rsab-player-domain-generic')
+              .addClass('rsab-player-domain')
+        })
+
         $.fn.dataTableExt.oSort['rsab-date-time-desc']  = function(x, y) {
             // Wrap the HTML in a div so we can use 'find' on it, without
             // needing to know if what we're looking for was already at the top
