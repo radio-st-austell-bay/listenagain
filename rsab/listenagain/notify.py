@@ -157,7 +157,7 @@ def notify_all(uploaded_files):
 
         template.keep_days = keep_days
         files_string = '\n'.join([
-            '    %s%s%s' % (
+            '    %s%s/%s' % (
                 remote_server,
                 remote_path,
                 os.path.split(fname)[1],
