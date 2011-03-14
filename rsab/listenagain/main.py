@@ -18,15 +18,6 @@
 #   read the schedule file and parsed file names), show and presenter names and
 #   methods for translating them.
 # - make RSS feeds when we make the index.
-# - error-handling for FTP: what if we can't get access to the server?  What if
-#   we have it but lose it?  (We need to make an index file which covers the
-#   files we won't delete but none of the new ones, upload that, then delete
-#   the old ones and upload the new ones before finally uploading the new
-#   index.)
-# - more FTP: check for existing file before uploading.  If it's the same size,
-#   don't upload.  If it's smaller, resume if possible rather than uploading.
-#   If we lose the connection, sleep and retry up to some limit -- last night
-#   it seems there was a blip in the connection.
 # - Web server: need it to support ranges.
 # - Can we supply a time to jPlayer so it doesn't have to download file right
 #   now in order to display duration?
@@ -43,23 +34,16 @@
 #   - Use ajax to retrieve table content.
 # - FTP:
 #   - Delete MP3 after uploading.
-#   - New FTP method to check existence and correct size.
 #   - MP3 upload method: return success if file already there and of correct
 #     size (so it can be deleted).  Return success if upload succeeds.  Trap
 #     errors and return failure.
-#   - Maintain dict mapping consecutive failures to seconds of wait (and None
-#     key for anything above highest explicit int key).  Each time an FTP
-#     method fails, increment the failures counter and wait appropriately.  If
-#     a method succeeds, reset the consecutive failures counter (but keep the
-#     total failures counter, which we'll test against a max allowed failures
-#     number, which will be relative to the number of files).  We may want to
-#     wrap this logic up in a wrapper method which the FTP class applies to all
-#     server-connecting methods.  Or to just those which are uploading?  Put
-#     try/except in wrapper around all methods, but only increment total
-#     counter for uploads?
 # - Keyboard shortcuts for web page.
 # - Gain-change alternatives?
 # - Delete local copies of MP3s more than N days old.
+# - If play button is pressed when nothing is selected, can we have it pick the
+#   first visible item and play it?  Is there an event to hook into here?
+# - Change email address from listenagain@ to listen@, and do the same for the
+#   domain in the config, and the CSS file name.
 
 
 
@@ -253,7 +237,13 @@ def run():
             else:
                 mp3s_dir = os.getcwd()
             mp3_files = glob.glob(os.path.join(mp3s_dir, '*.mp3'))
-        uploaded = ftp_conn.upload_audio(mp3_files)
+        uploaded = remote.upload_audio(ftp_conn, mp3_files)
+
+        # Reconnect (or grab the cached connection) in case there were failures
+        # during the upload.  A better structure would see us making this
+        # completely transparent across all remote calls, but for now we focus
+        # on the big upload.
+        ftp_conn = remote.connect()
 
         if True: # XXX look for no-delete option later
             print 'Deleting local copies of MP3s...'
