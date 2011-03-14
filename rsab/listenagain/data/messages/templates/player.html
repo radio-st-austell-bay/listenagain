@@ -189,7 +189,7 @@
           error: function (jqXHR, textStatus, errorThrown) {
               RSAB.fn.no_live_stream()
               RSAB.fn.go_if_ready('live')
-          },
+          }
         })
 
 
@@ -336,7 +336,7 @@
     <div id="rsab-logo">
       <img src="/images/newlogorsab.png" />
     </div>
-    <div id="rsab-page-heading">
+    <div id="rsab-page-heading" class="ui-widget">
       <span class="title">RSAB Audio Player</span>
       <div id="jquery_jplayer_rsab" class="jp-jplayer"></div>
       <div class="jp-audio" id="rsab-jp-player-ui">
@@ -391,7 +391,8 @@
     <div id="rsab-problems-dialog" title="Having problems?">
       <p>The music player uses HTML5 or Flash, depending on the capabilities of
       your web browser.  If you don't have HTML5 (or aren't sure), please add
-      <strong>listenagain.rsab.org</strong> to any Flash-blocker you have.</p>
+      <span class="rsab-player-domain-generic">this domain</span> to any
+      Flash-blocker you have.</p>
       <p>You can listen to the live stream in your computer's own media player
       by pointing it at <a href="/listen.m3u">
       <span style="display: inline-block" class="ui-icon ui-icon-link"></span>
