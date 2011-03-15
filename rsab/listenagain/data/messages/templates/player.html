@@ -130,7 +130,7 @@
             key = temp[0]
             value = temp.length > 1 ? temp[1] : key
             if(typeof rsab_select_pairs_seen[key] == 'undefined'
-            && 1||typeof rsab_all_recording_names[key] != 'undefined') {
+            && typeof rsab_all_recording_names[key] != 'undefined') {
                 rsab_select_pairs.push([value, key])
                 rsab_select_pairs_seen[key] = value
             }
