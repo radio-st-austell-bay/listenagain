@@ -71,7 +71,8 @@ fri,2300,0000,,,0,autodj
 sat,0000,0700,,,0,autodj
 sat,1000,1300,,,1,peteg,
 sat,1300,1500,,,1,garyking,
-sat,1500,1900,,,1,sport,dalegodding
+sat,1500,1700,,0,1,sport,dalegodding
+sat,1700,1900,0,,1,sport,dalegodding
 sat,1900,2200,,,1,saturdaysessions,natalieturl
 sat,2200,0000,,,0,autodj
 #--------------------------------------------------------------------
