@@ -112,6 +112,31 @@
               .addClass('rsab-player-domain')
         })
 
+        // XXX This will have to be moved around if the table rows get pulled
+        // in by AJAX.  And 'process_parameters' mustn't be called until this
+        // has been run...
+        rsab_all_recording_names = {}
+        $('td.rsab-playlist-item-show').find('input[name=show], input[name=presenter]').each(function () {
+            // We make this mapping to avoid adding items to the select which
+            // exist only in the live stream ('presentername' and 'showname'
+            // give us names for both the live stream and recordings).
+            rsab_all_recording_names[$(this).val()] = 1 // any value
+        })
+
+        rsab_select_pairs = []
+        rsab_select_pairs_seen = {}
+        $('input[name=showname], input[name=presentername]').each(function () {
+            temp = $(this).val().splitmax(':', 1)
+            key = temp[0]
+            value = temp.length > 1 ? temp[1] : key
+            if(typeof rsab_select_pairs_seen[key] == 'undefined'
+            && 1||typeof rsab_all_recording_names[key] != 'undefined') {
+                rsab_select_pairs.push([value, key])
+                rsab_select_pairs_seen[key] = value
+            }
+        })
+        rsab_select_pairs.sort()
+
         $.fn.dataTableExt.oSort['rsab-date-time-desc']  = function(x, y) {
             // Wrap the HTML in a div so we can use 'find' on it, without
             // needing to know if what we're looking for was already at the top
@@ -295,26 +320,10 @@
             RSAB.fn.go_if_ready('params')
           }
 
-          // XXX This will have to be moved around if the table rows get pulled
-          // in by AJAX.  And 'process_parameters' mustn't be called until this
-          // has been run...
-          rsab_select_pairs = []
-          rsab_select_pairs_seen = {}
-          $('input[name=showname], input[name=presentername]').each(function () {
-              temp = $(this).val().splitmax(':', 1)
-              key = temp[0]
-              value = temp.length > 1 ? temp[1] : key
-              if(typeof rsab_select_pairs_seen[key] == 'undefined') {
-                  rsab_select_pairs.push([key, value])
-                  rsab_select_pairs_seen[key] = value
-              }
-          })
-          rsab_select_pairs.sort()
-
           rsab_select = $('#rsab-table-filter select[name=name]')
           for(i = 0; i < rsab_select_pairs.length; i++) {
-              $('<option value="' + rsab_select_pairs[i][0] + '"></option>')
-                .text(rsab_select_pairs[i][1])
+              $('<option value="' + rsab_select_pairs[i][1] + '"></option>')
+                .text(rsab_select_pairs[i][0])
                 .appendTo(rsab_select)
           }
           $('<option value="!">(no match)</option>').appendTo(rsab_select)
