@@ -77,12 +77,13 @@ def read_schedule_file(date, fname, dow=None, require_dow=True):
             row[5] = False
 
         row[6] = row[6].strip().lower()
-        if not row[6] or ',' in row[6]:
-            raise_error('Show name is not valid', row[6])
 
         row[7] = [x.strip() for x in row[7].lower().split(';') if x.strip()]
         while row[6] in row[7]:
             row[7].remove(row[6])
+
+        if (not row[6] and not row[7]) or ',' in row[6]:
+            raise_error('Show name is not valid', row[6])
 
         details = {
             'date': date,
@@ -209,7 +210,7 @@ def schedule_from_audio_file_name(fname):
         _
         (?P<eh>[0-9]{2})(?P<em>[0-9]{2})(?P<es>[0-9]{2})
         _
-        (?P<show>[0-9a-zA-Z-]+)
+        (?P<show>[0-9a-zA-Z-]*)
         (?P<presenters>(?:,(?:[0-9a-zA-Z-]+))*)
         (?:_(?P<extra>.+))?\\.(?P<ext>[^.]+)
         ''',

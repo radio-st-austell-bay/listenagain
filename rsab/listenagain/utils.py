@@ -139,5 +139,9 @@ def get_show_title_string(show, presenters=None):
     if presenters:
         if len(presenters) > 1:
             presenters[:-1] = [ ', '.join(presenters[:-1]) ]
-        show_title = '%s (%s)' % (show_title, ' and '.join(presenters))
+        presenters = ' and '.join(presenters)
+        if show_title:
+            show_title = '%s (%s)' % (show_title, presenters)
+        else:
+            show_title = presenters
     return show_title

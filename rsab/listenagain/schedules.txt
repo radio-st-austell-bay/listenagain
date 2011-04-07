@@ -13,7 +13,8 @@ heading row.  The 8 columns must be:
    padding adds time to the end of the show; it's a whole number of seconds.
 6. Record?  1 to record, or 0 to skip.
 7. Show code name.  If the name starts with 'xx' it won't be shown in the
-   Listen Again player.
+   Listen Again player.  If the name is empty then at least one presenter name
+   must be present.
 8. Optional list of presenter code names, separated by semicolons.
 
 

@@ -139,7 +139,7 @@ def make_index_file(date, audio_fname_list, output_fname=None):
         show_title = utils.get_message(show_name, 'show', default=None)
         if show_title is None:
             show_title = utils.get_message(show_name, 'presenter', default=show_name)
-        if show_name not in show_name_mapping:
+        if show_name and show_name not in show_name_mapping:
             show_name_mapping[show_name] = show_title
         for presenter in details.get('presenters', []):
             if not presenter or presenter == show_name:
