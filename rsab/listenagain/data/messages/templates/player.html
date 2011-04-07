@@ -13,6 +13,15 @@
     <script type="text/javascript">
       $(document).ready(function(){
 
+        BOOL_TRUE = ['t', 'true', 'y', 'yes', 'on', '1', 1, true]
+        function rsab_is_parameter_true(parameter) {
+            // Optional second arg: result if parameter is empty
+            if(parameter == '' && arguments.length > 1) {
+                return arguments[1]
+            }
+            return BOOL_TRUE.indexOf(parameter) != -1
+        }
+
         RSAB = {}
         RSAB.ready_flags = {
             // XXX Can't seem to get the jPlayer events to fire...
@@ -264,22 +273,24 @@
                 value = temp.length == 1 ? '' : temp[1]
                 switch(key) {
                   case 'find':
-                    if(value == 'live') {
-                        matches = $('#rsab-playlist tr.rsab-playlist-item-live')
-                    }
-                    else {
-                      matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value^="/audio/' + value + '"]')
-                      if(!matches.length) {
-                          matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value*="' + value + '"]')
+                      if(value == 'live') {
+                          matches = $('#rsab-playlist tr.rsab-playlist-item-live')
                       }
-                    }
-                    if(matches.length) {
-                        matches.first().closest('tr.rsab-playlist-item').addClass('rsab-playlist-item-playing')
-                    }
-                    break
+                      else {
+                        matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value^="/audio/' + value + '"]')
+                        if(!matches.length) {
+                            matches = $('#rsab-playlist tr.rsab-playlist-item input[name=src][value*="' + value + '"]')
+                        }
+                      }
+                      if(matches.length) {
+                          matches.first().closest('tr.rsab-playlist-item').addClass('rsab-playlist-item-playing')
+                      }
+                      break
                   case 'live':
-                    $('#rsab-playlist tr.rsab-playlist-item-live').addClass('rsab-playlist-item-playing')
-                    break
+                      if(rsab_is_parameter_true(value, true)) {
+                          $('#rsab-playlist tr.rsab-playlist-item-live').addClass('rsab-playlist-item-playing')
+                      }
+                      break
                   case 'show':
                       rsab_select = $('#rsab-table-filter select[name=name]')
                       rsab_option = rsab_select.find('option[value="'+value+'"]')
@@ -313,7 +324,7 @@
                       }
                       break
                   case 'autoplay':
-                      RSAB.options.autoplay = true
+                      RSAB.options.autoplay = rsab_is_parameter_true(value, true)
                       break
                 }
             }
