@@ -11,6 +11,48 @@
     <script type="text/javascript" src="/js/dataTables.fnGetDisplayNodes.js"></script>
 
     <script type="text/javascript">
+
+      // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
+      if (!Array.prototype.indexOf)
+      {
+        Array.prototype.indexOf = function(searchElement /*, fromIndex */)
+        {
+          "use strict";
+
+          if (this === void 0 || this === null)
+            throw new TypeError();
+
+          var t = Object(this);
+          var len = t.length >>> 0;
+          if (len === 0)
+            return -1;
+
+          var n = 0;
+          if (arguments.length > 0)
+          {
+            n = Number(arguments[1]);
+            if (n !== n) // shortcut for verifying if it's NaN
+              n = 0;
+            else if (n !== 0 && n !== (1 / 0) && n !== -(1 / 0))
+              n = (n > 0 || -1) * Math.floor(Math.abs(n));
+          }
+
+          if (n >= len)
+            return -1;
+
+          var k = n >= 0
+                ? n
+                : Math.max(len - Math.abs(n), 0);
+
+          for (; k < len; k++)
+          {
+            if (k in t && t[k] === searchElement)
+              return k;
+          }
+          return -1;
+        };
+      }
+
       $(document).ready(function(){
 
         BOOL_TRUE = ['t', 'true', 'y', 'yes', 'on', '1', 1, true]
@@ -30,6 +72,7 @@
             params: false,
             live: false
         }
+        RSAB.go_called = false
         RSAB.options = {
             autoplay: false
         }
@@ -44,7 +87,10 @@
                     return
                 }
             }
-            RSAB.fn.go()
+            if(!RSAB.go_called) {
+                RSAB.go_called = true
+                RSAB.fn.go()
+            }
         }
 
         $('#rsab-not-live-warning-dialog').dialog({ autoOpen: false })
@@ -248,7 +294,24 @@
                     row = null
                     visible_rows = table.fnGetDisplayNodes()
                     if(visible_rows.length != 0) {
-                        row = visible_rows[0]
+                        // Autoplay logic: sort by most recent date first, then
+                        // by earliest start time on each date.  (We do this by
+                        // making a number which is DATE*10000 - TIME.)  In
+                        // particular this works when a show is split into two
+                        // files -- we start with the first.
+                        //
+                        // The live stream always comes before the other items.
+                        sorted_rows = []
+                        for(var i=0; i<visible_rows.length; i++) {
+                            row = $(visible_rows[i])
+                            sorted_rows.push([
+                                (Number(row.find('input[name=date_compact]').val()) * 10000) - Number(row.find('input[name=start_compact]').val()),
+                                row
+                            ])
+                        }
+                        sorted_rows.sort()
+                        sorted_rows.reverse()
+                        row = sorted_rows[0][1]
                     }
                 }
                 if(row) {
@@ -259,7 +322,7 @@
 
         RSAB.fn.process_parameters = function () {
             var query_parameters = !window.location.search ? [] : (
-                window.location.search[0] == '?'
+                window.location.search.slice(0, 1) == '?'
                 ? window.location.search.slice(1)
                 : window.location.search
             ).split('&')
