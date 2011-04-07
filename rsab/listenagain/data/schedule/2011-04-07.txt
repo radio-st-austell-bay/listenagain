@@ -1,0 +1,83 @@
+#--------------------------------------------------------------------
+# Monday
+mon,0000,0700,,,0,autodj
+mon,0700,1000,,,1,breakfast,jimkane;johnb
+mon,1000,1300,,,1,cornishconnexion,paulinegiles
+mon,1300,1600,,,1,bernieshepherd,
+mon,1600,1700,,,1,moiraking,
+mon,1700,2000,,,1,drivetime,robmoore
+mon,2000,2100,,,1,worldmusic,markfrazer
+# Brass In The Bay is prerecorded.  We aim to get this using a different
+# system in future (accessing the original recording).
+mon,2100,2200,,,1,brassinthebay,kevinackford
+mon,2200,0000,,,0,autodj
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Tuesday
+tue,0000,0700,,,0,autodj
+tue,0700,1000,,,1,breakfast,jimkane;sallycarter
+tue,1000,1300,,,1,domwherry,
+tue,1300,1600,,,1,johnb,
+tue,1600,1700,,,1,carclaze,simonpollard;janetpollard
+tue,1700,1900,,,1,janetandali,janetpollard;ali
+tue,1900,2030,,,1,readysteadymod,martinbate
+tue,2030,2200,,,1,dougbence,
+tue,2200,2300,,,0,vinyldecades
+tue,2300,0000,,,0,autodj
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Wednesday
+wed,0000,0700,,,0,autodj
+wed,0700,1000,,,1,breakfast,jimkane;nathanhunkin
+wed,1000,1300,,,1,jennytrennelly,
+wed,1300,1600,,,1,curtainup,sheilavanloo;gwenmcgirl
+wed,1600,1800,,,1,poltair,
+wed,1800,1900,,,1,midweekblues,garyking
+wed,1900,2200,,,1,endoftheworldshow,johnwinter;brad;dave
+wed,2200,0000,,,0,autodj
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Thursday
+thu,0000,0700,,,0,autodj
+thu,0700,1000,,,1,breakfast,jimkane;deebrown
+thu,1000,1300,,,1,baywatch,pamgriffin
+thu,1300,1600,,,1,malcolmfowler,
+thu,1600,1700,,,1,heligangrapevine,
+thu,1700,1800,,,1,staustellcollege,
+thu,1800,2000,,,1,eden,
+thu,2000,2200,,,1,radar,richardwhitehouse;stevetregidgo
+thu,2200,0000,,,0,autodj
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Friday
+fri,0000,0700,,,0,autodj
+fri,0700,1000,,,1,breakfast,jimkane
+fri,1000,1100,,,1,poetry,marjjames
+# Empty show name leads to us just using the presenter names
+fri,1100,1200,,,1,,sallycarter;deebrown
+fri,1200,1300,,,1,garyking,
+fri,1300,1600,,,1,newsviews,garyking;fionacarlyon
+fri,1600,1900,,,1,weekendwarmup,nathanhunkin
+fri,1900,2200,,,1,soundlounge,sheilavanloo;lu
+fri,2200,2300,,,0,screechybadman
+fri,2300,0000,,,0,autodj
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Saturday
+sat,0000,0700,,,0,autodj
+sat,1000,1300,,,1,peteg,
+sat,1300,1500,,,1,garyking,
+sat,1500,1700,,0,1,sport,dalegodding
+sat,1700,1900,0,,1,sport,dalegodding
+sat,1900,2200,,,1,saturdaysessions,natalieturl
+sat,2200,0000,,,0,autodj
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# (No new shows on Sunday)
+#--------------------------------------------------------------------
