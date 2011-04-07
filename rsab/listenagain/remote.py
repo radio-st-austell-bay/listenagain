@@ -225,7 +225,7 @@ def upload_audio(conn, audio_files, quiet=False):
             if not quiet:
                 print 'done.'
             failures = 0
-        stored.append(fname)
+            stored.append(fname)
     if conn is not None:
         conn.cwd(pwd)
 
