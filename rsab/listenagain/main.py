@@ -44,7 +44,50 @@
 #   first visible item and play it?  Is there an event to hook into here?
 # - Change email address from listenagain@ to listen@, and do the same for the
 #   domain in the config, and the CSS file name.
-
+#
+# - Looks like wave files above 2GB are problematic.  We may have to do
+#   something like create multiple (smaller) wave files, then have LAME join
+#   them all together.
+#
+# Traceback (most recent call last):
+#   File "R:\listenagain\rsab\listenagain\main.py", line 293, in ?
+#     run()
+#   File "R:\listenagain\rsab\listenagain\main.py", line 192, in run
+#     wav_files = audio.make_wav_files(bounds_and_files, schedule_list)
+#   File "R:\listenagain\rsab\listenagain\audio.py", line 86, in make_wav_files
+#     wav_writer.writeframes(data)
+#   File "C:\Python23\lib\wave.py", line 423, in writeframes
+#     self._patchheader()
+#   File "C:\Python23\lib\wave.py", line 470, in _patchheader
+#     self._file.write(struct.pack('<l', 36 + self._datawritten))
+# OverflowError: long int too large to convert to int
+# Exception exceptions.OverflowError: 'long int too large to convert to int' in <bound method Wave_write.__del__ of <wave.Wave_write instance at 0x00A56AA8>> ignored
+#
+# - Schedule page: link at top of each day's section to filter by day, but not
+#   autoplay.  Link next to each show to filter by day and show, autoplaying.
+#   Profile pages: link on each profile to filter by show/presenter.  Autoplay?
+#
+# - When using 'find', we want to change to the page which has the found item
+#   on it.  If there's no API call for this, must we change pages ourselves
+#   until we find it?  Or do something clever internally?  (For our show, and
+#   perhaps for other once-weekly shows, it's nicer to use 'find' so the user
+#   is encouraged to listen to other shows too, seeing them in the listing.)
+#
+# - Need an easy way to disable rows, used in conjunction with a file being
+#   deleted.  My suggestion is that we introduce a prefix ('x' or '_'), and
+#   have the index-generating code create a row which has no onclick, and
+#   which is styled to show the item is unavailable.  If we can have the web
+#   server generate the index file, we can trigger it with inotify (say) and
+#   then just rename the file to have the index sorted out.  (For uploads, we'd
+#   have to upload under a different name and then rename when the file is
+#   present.  The index file will then be generated after each file appears.
+#   The Aircheck box will simply not create the index.)
+#
+# - Hide the "(no match)" dropdown item if it's not selected by default.
+#
+# - Introduce an "About..." dialog with some basic overview of what the player
+#   is and who it's by (Radio St Austell Bay).  Arrange it so that's the text
+#   that shows up whn Facebook makes a link.
 
 
 def run():
@@ -260,6 +303,7 @@ def run():
     if options.index:
         # Second index file: whatever's on the server.
         remote_audio_files = ftp_conn.get_list_of_audio_files()
+
         index_fname = html.make_index_file(date, remote_audio_files)
         if options.upload:
             ftp_conn.storlines('STOR index.html', open(index_fname, 'r'))
