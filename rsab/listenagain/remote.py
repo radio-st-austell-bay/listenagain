@@ -174,6 +174,8 @@ def upload_audio(conn, audio_files, quiet=False):
     must_reconnect = False
     stored = []
     audio_files = audio_files[:]
+    if not quiet:
+        print 'DEBUG: start of loop.  Files remaining:', len(audio_files)
     while audio_files:
         fpath = audio_files[0]
         del audio_files[0]
@@ -220,12 +222,28 @@ def upload_audio(conn, audio_files, quiet=False):
             print 'Waiting for', wait_for, 'seconds before retrying...',
             time.sleep(wait_for)
             print 'done.'
+        except:
+            if not quiet:
+                print 'DEBUG: unexpected exception handling file:', fname
+                import traceback
+                traceback.print_exc()
+                print
+            raise
         else:
             f.close()
             if not quiet:
                 print 'done.'
             failures = 0
             stored.append(fname)
+        if not quiet:
+            print 'DEBUG: end of loop.  Files remaining:', len(audio_files)
+
+    if not quiet:
+        print 'DEBUG: audio_files loop ended.  Uploaded', len(stored), 'files:'
+        for fname in stored:
+            print '   ', fname
+        print
+
     if conn is not None:
         conn.cwd(pwd)
 
