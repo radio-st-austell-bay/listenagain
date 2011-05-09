@@ -75,6 +75,9 @@
         RSAB.options = {
             autoplay: false
         }
+        RSAB.current_media_is_stream = false
+        RSAB.current_media = null
+        RSAB._stream_reload_interval_id = null
 
         RSAB.fn = {}
         RSAB.fn.go_if_ready = function (flag) {
@@ -102,13 +105,47 @@
             $('#rsab-problems-dialog').dialog('open')
         })
 
+        RSAB.fn.control_stream_reloader = function (start) {
+            RSAB.fn._set_stream_reload_interval(0) // clear it
+            RSAB._stream_reload_interval_id = null
+            if(start) {
+                RSAB.fn._set_stream_reload_interval() // default
+            }
+        }
+
+        RSAB.fn._set_stream_reload_interval = function (interval) {
+            if(typeof interval == 'undefined') {
+                interval = 20*60*1000 // 20 minutes
+            }
+            if(RSAB._stream_reload_interval_id) {
+                clearInterval(RSAB._stream_reload_interval_id)
+            }
+            if(interval > 0) {
+                RSAB._stream_reload_interval_id = setInterval('RSAB.fn._stream_reload()', interval)
+            }
+        }
+
+        RSAB.fn._stream_reload = function () {
+            if(RSAB.current_media_is_stream && RSAB.current_media) {
+                var ext = RSAB.current_media.split('.').pop()
+                var media = {}
+                media[ext] = RSAB.current_media
+                var is_paused = $("#jquery_jplayer_rsab").data('jPlayer').status.paused
+                $("#jquery_jplayer_rsab").jPlayer("setMedia", media).jPlayer(is_paused ? "pause" : "play")
+            }
+        }
+
         $("#jquery_jplayer_rsab").jPlayer({
-          ready: function () {
+          ready: function (event) {
+              RSAB.using_flash = event.jPlayer.version.flash != 'unknown'
               RSAB.fn.go_if_ready('jplayer')
+              RSAB.fn.control_stream_reloader(true)
           },
-          ended: function () {
+          ended: function (event) {
               $('#rsab-playlist tr.rsab-playlist-item-playing').removeClass('rsab-playlist-item-playing')
+              RSAB.fn.control_stream_reloader(false)
           },
+
           volume: 0.5,
           cssSelectorAncestor: "#jp_interface_rsab",
           swfPath: "/js",
@@ -138,10 +175,11 @@
             if(row.hasClass('rsab-playlist-item-unavailable')) {
                 return
             }
-            var filepath = row.find('input[name="src"]').val()
-            var ext = filepath.split('.').pop()
+            RSAB.current_media = row.find('input[name="src"]').val()
+            var ext = RSAB.current_media.split('.').pop()
             var media = {}
-            media[ext] = filepath
+            media[ext] = RSAB.current_media
+            RSAB.current_media_is_stream = row.hasClass('rsab-playlist-item-live')
             $("#jquery_jplayer_rsab").jPlayer("setMedia", media).jPlayer("play")
             $("#jp_playlist_rsab").text($('.rsab-playlist-item-title', row).text())
             row.closest('table').find('.rsab-playlist-item-playing').not(row).removeClass('rsab-playlist-item-playing')
