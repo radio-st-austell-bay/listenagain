@@ -149,6 +149,9 @@
           volume: 0.5,
           cssSelectorAncestor: "#jp_interface_rsab",
           swfPath: "/js",
+          // Many HTML5 browsers do not support streaming natively, so we must
+          // try Flash first.
+          solution: "flash, html",
           supplied: "mp3"
         });
         $.jPlayer.timeFormat.showHour = true
