@@ -86,6 +86,7 @@ div#rsab-table-filter {
     background-color: #DBFF70;
 }
 
+#rsab-about,
 #rsab-not-live-warning,
 #rsab-problems {
     display: inline-block;

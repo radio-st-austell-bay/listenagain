@@ -95,6 +95,11 @@
             }
         }
 
+        $('#rsab-about-dialog').dialog({ autoOpen: false })
+        $('#rsab-about').click(function () {
+            $('#rsab-about-dialog').dialog('open')
+        })
+
         $('#rsab-not-live-warning-dialog').dialog({ autoOpen: false })
         $('#rsab-not-live-warning').hide().click(function () {
             $('#rsab-not-live-warning-dialog').dialog('open')
@@ -495,6 +500,18 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="ui-widget" id="rsab-about">
+      <div style="padding: 0pt 0.7em;" class="ui-state-highlight ui-corner-all">
+        <span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-info"></span>
+        About...
+      </div>
+    </div>
+
+    <div id="rsab-about-dialog" title="About...">
+      This is the Radio St Austell Bay online player.  Listen live to what's on
+      air right now, or choose any of the shows from the past week to hear again.
     </div>
 
     <div class="ui-widget" id="rsab-not-live-warning">
