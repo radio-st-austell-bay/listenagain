@@ -140,8 +140,17 @@ def get_schedule(date, filter_items=None):
             schedule_files_by_date.append( (date_for_fname, fname) )
         schedule_files_by_date.sort()
         schedule_file_path = None
-        for date_for_fname, schedule_file_path in schedule_files_by_date:
+        for date_for_fname, try_schedule_file_path in schedule_files_by_date:
+            # Later date: don't change the file we've already remembered, as
+            # it's the latest one before the current date.  Break.
             if date_for_fname > date:
+                break
+            # The file's date is less than or equal to the date we want.  Keep
+            # this file as a candidate for the schedule.
+            schedule_file_path = try_schedule_file_path
+            # Exact date: keep the file and break.  XXX I suspect we don't need
+            # this clause as it will all work anyway, but let's be explicit...
+            if date_for_fname == date:
                 break
     if schedule_file_path is None:
         schedule_from_file = []
