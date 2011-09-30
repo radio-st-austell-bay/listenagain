@@ -65,7 +65,7 @@ def make_playlist_item(audio_fname):
         audio_path += '/'
 
     details = schedule.schedule_from_audio_file_name(audio_fname)
-    if details['show'].startswith('xx'):
+    if details is None or details['show'].startswith('xx'):
         return ''
     template = Template('playlist-item')
     template.title = utils.get_show_title_string(
@@ -135,6 +135,8 @@ def make_index_file(date, audio_fname_list, output_fname=None):
 
     live_schedule = schedule.get_schedule(date + datetime.timedelta(days=1))
     for details in details_for_audio_files + live_schedule:
+        if details is None:
+            continue
         show_name = details['show']
         show_title = utils.get_message(show_name, 'show', default=None)
         if show_title is None:
