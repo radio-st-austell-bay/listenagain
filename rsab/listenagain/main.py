@@ -85,9 +85,15 @@
 #
 # - Hide the "(no match)" dropdown item if it's not selected by default.
 #
-# - Introduce an "About..." dialog with some basic overview of what the player
-#   is and who it's by (Radio St Austell Bay).  Arrange it so that's the text
-#   that shows up whn Facebook makes a link.
+# - New option to specify a CSV item, which overrides all CSV files.
+#
+# - Try to sync up schedule files from the web server before we go.
+#
+# - Can we try making this more "live"? Every few minutes look for a show
+# that's recently ended, then check the server to see if it's up there.  Then
+# upload it.  We'd have to ensure we didn't run more than one instance at a
+# time, and we'd need a catch-up at night to fill in anything we missed and
+# delete old shows.
 
 
 def run():
@@ -95,6 +101,7 @@ def run():
     import datetime
     import glob
     import os
+    import sys
     import time
 
     import audio
@@ -280,7 +287,14 @@ def run():
             else:
                 mp3s_dir = os.getcwd()
             mp3_files = glob.glob(os.path.join(mp3s_dir, '*.mp3'))
-        uploaded = remote.upload_audio(ftp_conn, mp3_files)
+
+        try:
+            uploaded = remote.upload_audio(ftp_conn, mp3_files)
+        except:
+            import traceback
+            print 'Exception uploading files'
+            traceback.print_exc(file=sys.stdout)
+            print 'Continuing...'
 
         # Reconnect (or grab the cached connection) in case there were failures
         # during the upload.  A better structure would see us making this
