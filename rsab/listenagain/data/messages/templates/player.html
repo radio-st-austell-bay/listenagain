@@ -6,9 +6,10 @@
     <link type="text/css" href="/css/listenagain.css" rel="stylesheet" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
     <script type="text/javascript" src="/js/jquery.jplayer.min.js"></script>
-    <script type="text/javascript" src="js/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui-1.8.9.custom.min.js"></script>
     <script type="text/javascript" src="/js/jquery.dataTables.js"></script>
     <script type="text/javascript" src="/js/dataTables.fnGetDisplayNodes.js"></script>
+    <script type="text/javascript" src="/js/nowplaying.js"></script>
 
     <script type="text/javascript">
 
@@ -434,6 +435,9 @@
                   case 'autoplay':
                       RSAB.options.autoplay = rsab_is_parameter_true(value, true)
                       break
+                  case 'np':
+                      RSAB.options.show_now_playing = rsab_is_parameter_true(value, true)
+                      break
                 }
             }
             RSAB.fn.go_if_ready('params')
@@ -459,6 +463,33 @@
           })
 
           RSAB.fn.process_parameters()
+
+          RSAB.DEFAULT_LIVESTREAM_LABEL = 'Live stream'
+          RSAB.livestream_label = RSAB.DEFAULT_LIVESTREAM_LABEL
+          RSAB.fn.nowplaying_callback = function(changed, history_data) {
+              if(changed) {
+                  if(history_data.is_playing && history_data.history.length) {
+                      var current_item = history_data.history[history_data.history.length - 1]
+                      new_label = RSAB.DEFAULT_LIVESTREAM_LABEL + ': ' + current_item.title
+                      if(current_item.artist && current_item.title) {
+                          new_label += ' by '
+                      }
+                      new_label += current_item.artist
+                  }
+                  else {
+                      new_label = RSAB.DEFAULT_LIVESTREAM_LABEL
+                  }
+                  if(!$('#rsab-playlist tr.rsab-playlist-item-live').hasClass('rsab-playlist-item-unavailable')) {
+                      RSAB.livestream_label = new_label
+                      $('#rsab-playlist tr.rsab-playlist-item-live .rsab-playlist-item-title').text(new_label)
+                      $("#jp_playlist_rsab").text(new_label)
+                  }
+              }
+          }
+
+          if(RSAB.options.show_now_playing && typeof(RSAB_NP) != 'undefined') {
+              RSAB_NP.register_callback(RSAB.fn.nowplaying_callback)
+          }
 
       });
     </script>
