@@ -482,6 +482,8 @@
                   if(!$('#rsab-playlist tr.rsab-playlist-item-live').hasClass('rsab-playlist-item-unavailable')) {
                       RSAB.livestream_label = new_label
                       $('#rsab-playlist tr.rsab-playlist-item-live .rsab-playlist-item-title').text(new_label)
+                  }
+                  if(RSAB.current_media_is_stream) {
                       $("#jp_playlist_rsab").text(new_label)
                   }
               }
