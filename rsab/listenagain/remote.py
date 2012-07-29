@@ -78,7 +78,7 @@ class ListenAgainFTP(_FTP):
         self.cwd(dirpath)
 
 
-    def remove_old_audio(self, earliest_keep_date, quiet=False):
+    def remove_old_audio(self, date_today, keep_days, quiet=False):
         if not self.exists(self._laftp_config['audio_path']):
             return
 
@@ -92,14 +92,23 @@ class ListenAgainFTP(_FTP):
             if fname.startswith('.'):
                 continue
             schedule_data = schedule.schedule_from_audio_file_name(fname)
-            if schedule_data is not None \
-            and schedule_data['date'] < earliest_keep_date:
-                if not quiet:
-                    print 'Deleting remote file:', fname, '...',
-                self.delete(fname)
-                if not quiet:
-                    print 'done.'
-                deleted.append(fname)
+            if schedule_data is not None:
+                keep_days_this_file = schedule_data.get('extra', {}).get('days', [])
+                if keep_days_this_file:
+                    try:
+                        keep_days_this_file = int(keep_days_this_file[0])
+                    except ValueError:
+                        keep_days_this_file = keep_days
+                else:
+                    keep_days_this_file = keep_days
+                earliest_keep_date = date_today - datetime.timedelta(days=keep_days_this_file-1)
+                if schedule_data['date'] < earliest_keep_date:
+                    if not quiet:
+                        print 'Deleting remote file:', fname, '...',
+                    self.delete(fname)
+                    if not quiet:
+                        print 'done.'
+                    deleted.append(fname)
         self.cwd(pwd)
         return deleted
 

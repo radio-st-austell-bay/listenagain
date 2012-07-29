@@ -13,6 +13,7 @@ def read_schedule_file(date, fname, dow=None, require_dow=True):
     import csv
     import datetime
     import re
+    import cgi
     start_or_end = re.compile('([0-9]{2}):?([0-9]{2})')
     from rsab.listenagain import ListenAgainDataError
 
@@ -30,10 +31,10 @@ def read_schedule_file(date, fname, dow=None, require_dow=True):
             continue
         if len(row) < 7:
             raise_error('Row must have at least 7 (preferably 8) items', row)
-        if len(row) == 7:
+        while len(row) < 9:
             row.append('')
-        elif len(row) > 8:
-            del row[8:]
+        if len(row) > 9:
+            del row[9:]
 
         dow_number = get_dow_number(row[0])
         if require_dow and dow_number is None:
@@ -93,7 +94,8 @@ def read_schedule_file(date, fname, dow=None, require_dow=True):
             'pad_end': row[4],
             'record': row[5],
             'show': row[6],
-            'presenters': row[7]
+            'presenters': row[7],
+            'extra': cgi.parse_qs(row[8]),
         }
         all_rows.append( (row, details) )
 
@@ -205,13 +207,18 @@ def get_schedule_item_as_string(details):
         '%-20s' % details['show'],
         ','.join(details.get('presenters', [])),
     ]
-    return ' '.join(components)
+    lines = [' '.join(components)]
+    if details.get('extra', {}):
+        for k, v in details['extra'].items():
+            lines.append(' > %s: %s' % (k, v))
+    return '\n'.join(lines)
 
 
 def schedule_from_audio_file_name(fname):
     import datetime
     import os.path
     import re
+    import cgi
     pattern = re.compile('''
         (?P<y>[0-9]{4})(?P<m>[0-9]{2})(?P<d>[0-9]{2})
         _
@@ -231,6 +238,10 @@ def schedule_from_audio_file_name(fname):
         return None
 
     groups = match.groups()
+    if groups[11] is not None:
+        extra = cgi.parse_qs(groups[11])
+    else:
+        extra = {}
     schedule_dict = {
         'date': datetime.date(int(groups[0]), int(groups[1]), int(groups[2])),
         'start': datetime.time(int(groups[3]), int(groups[4]), int(groups[5])),
@@ -238,7 +249,7 @@ def schedule_from_audio_file_name(fname):
         'record': False,
         'show': groups[9].strip(),
         'presenters': filter(None, [p.strip() for p in groups[10].split(',')]),
-        'extra': groups[11],
+        'extra': extra,
     }
     return schedule_dict
 

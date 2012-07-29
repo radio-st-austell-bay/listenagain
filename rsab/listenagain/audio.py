@@ -105,6 +105,9 @@ def make_output_file_name(details, ext, extra=None):
         details['end'].strftime('%H%M%S'),
         ','.join([details['show']] + (details.get('presenters', []))),
     ]
+    if details.get('extra', {}):
+        import urllib
+        base_items.append(urllib.urlencode(details['extra'], doseq=True))
     if extra:
         base_items.append(extra)
     fname = '_'.join(base_items)

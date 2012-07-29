@@ -260,6 +260,11 @@ def run():
         remote_audio_files = ftp_conn.get_list_of_audio_files()
 
         # First make an index with no old files:
+        # XXX For now this ignores per-file limits, so will remove everything
+        # over N days old from the index temporarily.  If a file has a higher
+        # number of days defined, it will be restored to the index later when
+        # it's not deleted -- but for a file with a lower number of days
+        # defined, it'll disappear later than it should.
         audio_files_for_first_index = [
             fname
             for (fname, details) in [
@@ -274,7 +279,7 @@ def run():
             ftp_conn.storlines('STOR index.html', open(index_fname, 'r'))
 
     if options.upload:
-        ftp_conn.remove_old_audio(earliest_keep_date)
+        ftp_conn.remove_old_audio(date, keep_days)
 
         # XXX Here we should delete local copies of MP3s that are more than N
         # days old, in case the upload has failed for more than N days.
