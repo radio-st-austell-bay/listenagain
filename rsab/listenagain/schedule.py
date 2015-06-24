@@ -118,7 +118,7 @@ def get_schedule(date, filter_items=None):
     if config.has_option('main', 'schedules'):
         schedules_folder = config.get('main', 'schedules')
     if not os.path.isdir(schedules_folder):
-        raise ListenAgainConfigError('Cannot find schedules folder', folder)
+        raise ListenAgainConfigError('Cannot find schedules folder', schedules_folder)
 
     schedule_file_path = None
     require_dow = True
