@@ -98,11 +98,17 @@ def format_large_number(n):
 _absent_parameter = object()
 def get_message(message_name, message_type, default=_absent_parameter):
     from rsab.listenagain import config
+    import os
     if not config.has_option('messages', message_type):
         if default is _absent_parameter:
-            raise ValueError('Message file not found', message_type)
+            raise ValueError('Message file not configured', message_type)
         return default
-    f = open(config.get('messages', message_type), 'r')
+    fname = config.get('messages', message_type)
+    if not os.path.exists(fname):
+        if default is _absent_parameter:
+            raise ValueError('Message file not found', message_type, fname)
+        return default
+    f = open(fname, 'r')
     found_message = None
     for line in f:
         line = line.strip()
@@ -145,3 +151,4 @@ def get_show_title_string(show, presenters=None):
         else:
             show_title = presenters
     return show_title
+
