@@ -19,7 +19,7 @@ def run():
     option_parser.add_option(
         '--human-readable',
         dest='human_readable',
-        help="Print human-readable Python output instead of JSON.",
+        help="Add line-breaks and indentation to the JSON output",
         action='store_true',
     )
     options, args = option_parser.parse_args()
@@ -111,10 +111,10 @@ def run():
         date += datetime.timedelta(days=1)
 
     if options.human_readable:
-        import pprint
-        pprint.pprint(results)
+        indent = '  '
     else:
-        print simplejson.dumps(results)
+        indent = None
+    print simplejson.dumps(results, indent=indent, sort_keys=True)
     return 0
 
 
