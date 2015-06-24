@@ -53,6 +53,12 @@ def interpret_date_string(date_string):
         date -= datetime.timedelta(days=1)
     elif date_string == 'today':
         date = datetime.date.today()
+    elif date_string.startswith('-'):
+        date = datetime.date.today()
+        date -= datetime.timedelta(days=int(date_string[1:]))
+    elif date_string.startswith('+'):
+        date = datetime.date.today()
+        date += datetime.timedelta(days=int(date_string[1:]))
     else:
         date = parse_date(date_string)
         if date is None:
