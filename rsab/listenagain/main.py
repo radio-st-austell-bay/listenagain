@@ -276,7 +276,15 @@ def run():
 
         index_fname = html.make_index_file(date, audio_files_for_first_index)
         if options.upload:
-            ftp_conn.storlines('STOR index.html', open(index_fname, 'r'))
+            if config.has_option('ftp', 'index_path'):
+                remote_index_dir = config.get('ftp', 'index_path')
+                ftp_conn.cwd_make_if(remote_index_dir)
+                ftp_conn.cwd(remote_index_dir)
+            ftp_conn.storlines(
+                'STOR %s' % (os.path.split(index_fname)[1],),
+                open(index_fname, 'r'),
+            )
+            ftp_conn.cwd('/')
 
     if options.upload:
         ftp_conn.remove_old_audio(date, keep_days)
@@ -325,7 +333,15 @@ def run():
 
         index_fname = html.make_index_file(date, remote_audio_files)
         if options.upload:
-            ftp_conn.storlines('STOR index.html', open(index_fname, 'r'))
+            if config.has_option('ftp', 'index_path'):
+                remote_index_dir = config.get('ftp', 'index_path')
+                ftp_conn.cwd_make_if(remote_index_dir)
+                ftp_conn.cwd(remote_index_dir)
+            ftp_conn.storlines(
+                'STOR %s' % (os.path.split(index_fname)[1],),
+                open(index_fname, 'r'),
+            )
+            ftp_conn.cwd('/')
             # XXX Now also sync up anything that's in the www directory
             # (resource files such as JS, CSS, images, jPlayer...).
             pass
