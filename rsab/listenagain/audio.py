@@ -41,6 +41,12 @@ def make_wav_files(bounds_and_files, schedule_list):
         actual_time_start = datetime.datetime.combine(details['date'], actual_time_start)
         actual_time_end = utils.apply_padding(details['end'], details.get('pad_end', 0), subtract=False)
         actual_time_end = datetime.datetime.combine(details['date'], actual_time_end)
+        if actual_time_end < actual_time_start:
+            new_actual_time_end = actual_time_end + datetime.timedelta(days=1)
+            # <6 hours means it could be a show -- else it's a mistake!
+            if new_actual_time_end - actual_time_start < datetime.timedelta(hours=6):
+                actual_time_end = new_actual_time_end
+            del new_actual_time_end
 
         print
         print 'Schedule:', schedule.get_schedule_item_as_string(details)
