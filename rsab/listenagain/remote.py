@@ -36,7 +36,11 @@ class ListenAgainFTP(_FTP):
     def exists(self, path):
         import os.path
         head, tail = os.path.split(path)
-        return tail in self.nlst(head)
+        listing = self.nlst(head)
+        FULL_PATH_IN_LISTING = True  # FTP server returns full paths now
+        if FULL_PATH_IN_LISTING:
+            return path in listing
+        return tail in listing
 
 
     def get_size(self, path):
